@@ -153,8 +153,16 @@ def read():
 
 
 i2c = I2C(0)   # default setting :  scl=Pin(5), sda=Pin(4)
-    
+# I2C(0, freq=399361, scl=5, sda=4, timeout=50000)
+
 __init__()
+
 while True:
   print(f"dist: {read()/10} cm")
-  utime.sleep(1)
+  utime.sleep(0.1)
+
+
+
+#
+#
+#
