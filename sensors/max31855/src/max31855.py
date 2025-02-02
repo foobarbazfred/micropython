@@ -36,7 +36,13 @@ class MAX31855:
         if scv_flag == 0 and  scg_flag == 0 and oc_flag == 0:
             status = 'OK'
         else:
-            status = 'ERROR'
+            status = "ERROR"
+            if scv_flag == 1:
+                   status += ",SVC"
+            if scg_flag == 1:
+                   status += ",SCG"
+            if oc_flag == 1:
+                   status +=",OC"
         return (tc_temp, int_temp, status)
     
     #
