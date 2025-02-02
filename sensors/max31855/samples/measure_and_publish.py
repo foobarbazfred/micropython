@@ -14,15 +14,14 @@ USERID="X5................YKBj"
 CLIENT_ID="RPi_1234"
 MQTT_TOPIC = 'v1/devices/me/telemetry'
 
-
 #
 # defs for MAX31855
 #
 SPI_CH = 0  # SPI0
-GP_CLK = 2  # SPI0_CLK : Pin 2
-GP_MOSI = 3 # SPI0_MOSI : Pin 3
-GP_MISO = 4 # SPI0_MISO : Pin 4
-GP_CS = 5   # SPI CS : Pin 2
+GP_CLK = 2  # SPI0_CLK  : GP2 [4]
+GP_MOSI = 3 # SPI0_MOSI : GP3 [5]
+GP_MISO = 4 # SPI0_MISO : GP4 [6]
+GP_CS = 5   # SPI CS    : GP5 [7]
 SPI_CLK = 5_000_000  # SPI Clock 50KHz
 
 
