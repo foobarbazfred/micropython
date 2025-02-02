@@ -10,7 +10,7 @@ from max31855 import MAX31855
 # defs for ThingsBoard MQTT Connection
 #
 SERVER="192.168.10.100"
-USERID="X5g3fQ6o1VCAqcNVYKBj"
+USERID="X5................YKBj"
 CLIENT_ID="RPi_1234"
 MQTT_TOPIC = 'v1/devices/me/telemetry'
 
@@ -50,8 +50,10 @@ max31855 = MAX31855(spi, cs)
 #
 while True:
     (tc_temp, int_temp, status) = max31855.get_temperature()
-    msg = json.dumps({'temperature' : tc_temp})
-    print('publish:', msg)
-    client.publish(MQTT_TOPIC, msg)
+    if status == 'OK':
+        msg = json.dumps({'temperature' : tc_temp})
+        (yy,mm,dd,hh,mm,ss, x, y ) = time.localtime()
+        print('publish:', msg, f"at {hh+9}:{mm}:{ss}")
+        client.publish(MQTT_TOPIC, msg)
     time.sleep(10)
 
