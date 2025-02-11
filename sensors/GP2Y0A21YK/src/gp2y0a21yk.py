@@ -1,5 +1,5 @@
 #
-# GP2Y0A21YK
+# driver for distance sensor GP2Y0A21YK0F
 # v0.02 (2025/2/11)
 #
 
