@@ -29,9 +29,10 @@ def median_filter(value_list):
 
 
 #
-# Conversion formula for estimating weight from resistance value
+# estimating weight from resistance value
 #
 def estimate_weight(resistance):
+    # Conversion formula for estimating weight from resistance value
     weight = 3.33 * (1 / (resistance/1000.0) - 0.2)
     return weight
 
