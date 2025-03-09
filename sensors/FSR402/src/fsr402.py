@@ -1,16 +1,18 @@
 #
 #  FSR402 Driver
-#  0.01 (2025/3/9 17:00)
 #
-# estimate weight by  quadratic equation
+#  0.01 (2025/3/9 17:00)
+#     estimate weight by  quadratic equation
+#  0.02 (2025/3/9 17:00)
+#     refactor source code
 # 
 
 from machine import ADC
 import time
 
-PIN_ADC0=26
+PIN_ADC0 = 26
 
-SAMPLIG_SIZE=21
+SAMPLIG_SIZE = 21
 samplig_data_list = [0] * SAMPLIG_SIZE
 
 # Resistance value of the resistor connected to the sensor, 
@@ -22,7 +24,7 @@ WEIGHT_OF_STAND = 0.2  # 200g
 # Voltage of VCC
 VCC_VOLTAGE = 3.3
 
-adc = ADC(PIN_ADC0)        # 
+adc = ADC(PIN_ADC0)         
 
 def median_filter(samplig_data_list):
     calc_buf  = samplig_data_list.copy()
@@ -57,17 +59,32 @@ def measure_weight():
     register = 0
     weight = 0
     while True:
+        #
+        # sampling ADC data (25 times)
+        #
         for _ in range(25):
             adc_val = adc.read_u16()  # 
             samplig_data_list.append(adc_val)
             _ = samplig_data_list.pop(0)     # to avoid print out
             time.sleep(0.02)
     
+        #
+        # get filterd data (median filter)
+        #
         filterd_val = median_filter(samplig_data_list)
+        # 
+        # convert ADC value to voltage
+        # 
         vol = 3.3 * filterd_val / 65535   # 0v - 2V
         if vol != 0:
+            #
+            # calcurate regsitance value of sensor
+            #
             resistance = VALUE_OF_REGISTER_1 * (VCC_VOLTAGE - vol) / vol
             if resistance != 0:
+                #
+                # estimate weight from resistance with formula
+                #
                 weight = estimate_weight(resistance) - WEIGHT_OF_STAND
             else:
                 weight = 0
@@ -75,7 +92,7 @@ def measure_weight():
             resistance = 0
             weight = 0
         if weight < 0 :
-              weight='***'
+              weight = '***'
               print(f'{weight}(Kg)')
         else:
               print(f'{weight}(Kg)')
