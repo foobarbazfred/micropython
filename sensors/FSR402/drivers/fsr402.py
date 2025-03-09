@@ -5,9 +5,12 @@
 #     estimate weight by  quadratic equation
 #  0.02 (2025/3/9 17:00)
 #     refactor source code
-# 
+#  0.03 (2025/3/9 17:40)
+#     Adding a function to display weight using an LCD
+#    
 
 from machine import ADC
+from machine import Pin
 import time
 
 PIN_ADC0 = 26
@@ -25,6 +28,19 @@ WEIGHT_OF_STAND = 0.2  # 200g
 VCC_VOLTAGE = 3.3
 
 adc = ADC(PIN_ADC0)         
+
+
+#
+# setup LCD
+#
+LCD_AVAILABLE = True
+if LCD_AVAILABLE:
+   from st7032 import ST7032LCD
+   from machine import I2C
+   i2c = I2C(1, scl=Pin(19), sda=Pin(18), freq=10000) # OK??
+   lcd =  ST7032LCD(i2c)
+
+
 
 def median_filter(samplig_data_list):
     calc_buf  = samplig_data_list.copy()
@@ -97,6 +113,14 @@ def measure_weight():
         else:
               print(f'{weight}(Kg)')
         print(f'{resistance/1000} (K Ohm), {vol}V, {filterd_val}')
+        if LCD_AVAILABLE:
+             if weight < 0 :
+                   report = '*** (Kg)\n'
+             else:                      
+                   report = f'W:{weight:.2f}(Kg)\n'
+             report +=  f'R:{resistance/1000:.2f}(KOhm)'
+             lcd.print(report, cls=True)
+
     
 #
 #
