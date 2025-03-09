@@ -4,3 +4,4 @@ sensors/vl53l1x/src/vl53l1x.py~
 sensors/MAX31855_/samples/test.py~
 sensors/MAX31855_/samples/measure_and_publish.py~
 sensors/VL53L1X/drivers/vl53l1x.py~
+displays/ST7032/drivers/st7032.py~

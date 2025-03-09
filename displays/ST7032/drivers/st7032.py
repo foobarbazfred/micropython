@@ -10,6 +10,8 @@
 # V0.3  refactor to ST7032LCD class 
 # V0.4  bug fix: kana convert
 #       utime -> time
+# V0.5  support greek characters (under developing)
+#       
 #
 
 import time
@@ -53,6 +55,13 @@ DAKU_TABLE = {
 
 HANDAKU_TABLE = {
    'pa' : 'ha',  'pi' : 'hi',  'pu' : 'hu',  'pe' : 'he',  'po' : 'ho',
+}
+
+GREEK_TABLE = {
+    'SECTION' :  0x12, 'RAGRAPH' : 0x13, 'GAMMA' :  0x14, 'DELTA' :  0x15,
+    'THETA' :  0x16, 'LAMBDA' :  0x17, 'XI' :  0x18, 'PI' :  0x19,
+    'SIGMA' :  0x1A, 'UPSILON' :  0x1B, 'PHI' :  0x1C, 'PSI' :  0x1D,
+    'OMEGA' :  0x1E, 'ALPHA' :  0x1F,
 }
 
 
@@ -101,6 +110,27 @@ class ST7032LCD:
                 self.i2c.writeto_mem(LCD_ADDR, 0x40, out_str.encode('ascii'))
                 time.sleep_ms(100)
     
+    def print_greek(self, out_str, cls=False):
+
+        if cls:
+            self.cls()
+
+        if '\n' in out_str:
+            line0 = out_str.split('\n')[0]
+            line1 = out_str.split('\n')[1]
+            if line0 != '':
+                self.i2c.writeto_mem(LCD_ADDR, 0x40, self.greek2code(line0))
+                time.sleep_ms(100)
+            self.CRLF()
+            if line1 != '':
+                self.i2c.writeto_mem(LCD_ADDR, 0x40, self.greek2code(line1))
+                time.sleep_ms(100)
+        else:
+            if out_str != '':
+                self.i2c.writeto_mem(LCD_ADDR, 0x40, self.greek2code(out_str))
+                time.sleep_ms(100)
+    
+
     def print_kana(self, out_str, cls=False):
 
         if cls:
