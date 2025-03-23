@@ -3,6 +3,7 @@
 #  v0.01 (2025/3/22)
 #  v0.02 (2025/3/23)    refactoring
 #  v0.03 (2025/3/23)    Feature Update; white balanace
+#  v0.04 (2025/3/23)    Feature Update; identify  white color, black color
 #
 
 import time
@@ -146,7 +147,7 @@ def sensor_start(i2c ,np):
         print(f'norm: R: {norm_r}, G: {norm_g}, B: {norm_b}')
         (hue, sat, brt) = rgb2hsv(norm_r, norm_g, norm_b)
         print(f"Hue: {hue}, Sat: {sat}, Brt: {brt}")
-        print(hue2cr(hue))
+        print(hsb2cw(hue,sat,brt))
         if(brt > 1.5):
            print("wb!")
 
@@ -215,11 +216,17 @@ def np_light_on(np,brightness=20):
 
 COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5GB", "10GB", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
 
-def hue2cr(hue):
-  if hue < 9 or hue > 350:
+def hsb2cw(h,s,b):
+  if b < 0.15:     # if brightness is lower than 0.1 then black
+     return('BK')
+  if s < 0.2 and b > 0.3:
+     return('HW')
+  if b < 0.65:     # if bright is lower than 0.65 then
+     return None  # not set color
+  if h < 9 or h > 350:
     idx = 0
   else:
-    idx = int((hue - 9) / 18) + 1
+    idx = int((h-9)/18) + 1
   return COLOR_WHEEL[idx]
 
 
