@@ -208,8 +208,7 @@ def np_light_on(np,brightness=20):
 CW_BLACK_LEVEL_BRIGHTNESS = 0.10
 CW_WHITE_LEVEL_BRIGHTNESS = 0.3
 CW_WHITE_LEVEL_SATURATION = 0.2
-
-COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5GB", "10GB", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
+COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5BG", "10BG", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
 
 def hsb2cw(h,s,b):
   new_h = h + int(len(COLOR_WHEEL) / 2)
