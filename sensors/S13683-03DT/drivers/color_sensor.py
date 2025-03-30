@@ -4,6 +4,7 @@
 #  v0.02 (2025/3/23)    refactoring
 #  v0.03 (2025/3/23)    Feature Update; white balanace
 #  v0.04 (2025/3/23)    Feature Update; identify  white color, black color
+#  v0.05 (2025/3/30)    Feature Update; change COLOR LED RING (12 LEDS)
 #
 
 import time
@@ -40,9 +41,8 @@ INTEGRATIN_TIME_SL_LONG = 0b10
 INTEGRATIN_TIME_SL_SHORT = 0b01
 INTEGRATIN_TIME_SHORT = 0b00
 
-# default whilte balance
-WHITE_BALANCE={'r' : 1788, 'g' : 2900,  'b' : 2819}
-
+# default whilte balance (max value when white paper is set)
+WHITE_BALANCE = {'r': 5725, 'g': 6345, 'b': 5894, }
 
 #LED_PIN : 0
 #WB_SW : 1
@@ -50,6 +50,8 @@ WHITE_BALANCE={'r' : 1788, 'g' : 2900,  'b' : 2819}
 
 LED_PIN = 0
 WB_SW_PIN = 1
+
+OPEN_BLIGHTNESS = 0.20
 
 
 
@@ -68,13 +70,6 @@ def read_control_reg(i2c):
 def set_manual_timing_reg(i2c, upper_byte, lower_byte):
     bytes_data = bytes((upper_byte, lower_byte))
     i2c.writeto_mem(I2C_ADDR, REG_MANUAL_TIMING, bytes_data)
-
-
-#def rgb_read(i2c):
-#    set_control_reg(i2c, 0x84)   # RESET,Operating mode, Low gain, ManualSetting
-#    set_control_reg(i2c, 0x04)   # 
-#    time.sleep_ms(546*4+100)
-#    return read_rgb_regs(i2c)
 
 
 def read_rgb_regs(i2c):
@@ -188,22 +183,18 @@ def rgb2hsv(r,g,b):
 
 np = None
 def neopixel_init(pin):
-    np = NeoPixel(pin, 20)   
+    np = NeoPixel(pin, 12)    # 12 LED RING
     return np
 
 def np_light_off(np):
-    np[9] = (00, 00, 00)
-    np[10] =   (00, 00, 00)
-    np[11] =   (00, 00, 00)
-    np[12] =   (00, 00, 00)
+    for i in range(len(np)):
+       np[i] = (00, 00, 00)
     np.write()              
 
 def np_light_on(np,brightness=20):
-    rgb_brightness = (brightness, brightness, brightness)
-    np[9] = rgb_brightness
-    np[10] =  rgb_brightness
-    np[11] =  rgb_brightness
-    np[12] =  rgb_brightness
+    rgb_brightness = (int(brightness * 1.7), int(brightness * 1.0), int(brightness*0.9))
+    for i in range(len(np)):
+       np[i] = rgb_brightness
     np.write()              
 
 #
@@ -214,20 +205,25 @@ def np_light_on(np,brightness=20):
 # https://zokeifile.musabi.ac.jp/%E8%89%B2%E7%9B%B8%E7%92%B0/
 # Munsell Color Wheel
 
+CW_BLACK_LEVEL_BRIGHTNESS = 0.10
+CW_WHITE_LEVEL_BRIGHTNESS = 0.3
+CW_WHITE_LEVEL_SATURATION = 0.2
+
 COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5GB", "10GB", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
 
 def hsb2cw(h,s,b):
-  if b < 0.15:     # if brightness is lower than 0.1 then black
+  new_h = h + int(len(COLOR_WHEEL) / 2)
+  if new_h >= 360:
+     new_h -= 360
+  idx = int(new_h/len(COLOR_WHEEL))
+  color_name = COLOR_WHEEL[idx]
+  if b < CW_BLACK_LEVEL_BRIGHTNESS:     # if brightness is lower than 0.1 then black
      return('BK')
-  if s < 0.2 and b > 0.3:
-     return('HW')
-  if b < 0.65:     # if bright is lower than 0.65 then
-     return None  # not set color
-  if h < 9 or h > 350:
-    idx = 0
-  else:
-    idx = int((h-9)/18) + 1
-  return COLOR_WHEEL[idx]
+  if s < CW_WHITE_LEVEL_SATURATION  and b > CW_WHITE_LEVEL_BRIGHTNESS:
+     return(f'HW ({color_name})')
+  if b < OPEN_BLIGHTNESS:   # if open (blightness of open)
+     return f'None ({color_name})'  # not set color
+  return color_name
 
 
 wb_mode = False
@@ -261,9 +257,4 @@ def main():
     init_sensor(i2c)
     sensor_start(i2c,np)
 
-
-
-
 main()
-
-
