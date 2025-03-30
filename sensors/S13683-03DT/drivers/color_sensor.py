@@ -170,11 +170,6 @@ def rgb2hsv(r,g,b):
     return (h, s, v)
 
 
-#hex(i2c.readfrom_mem(0x2a,0,1)[0])
-##'0xe4'
-#i2c.readfrom_mem(0x2a,0,3)
-#i2c.readfrom_mem(0x2a,0,11)
-
 
 #
 #
@@ -208,6 +203,7 @@ def np_light_on(np,brightness=20):
 CW_BLACK_LEVEL_BRIGHTNESS = 0.10
 CW_WHITE_LEVEL_BRIGHTNESS = 0.3
 CW_WHITE_LEVEL_SATURATION = 0.2
+
 COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5BG", "10BG", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
 
 def hsb2cw(h,s,b):
@@ -256,4 +252,10 @@ def main():
     init_sensor(i2c)
     sensor_start(i2c,np)
 
+
+
 main()
+
+
+#
+# end of file
