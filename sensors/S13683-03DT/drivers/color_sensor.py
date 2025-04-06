@@ -5,6 +5,7 @@
 #  v0.03 (2025/3/23)    Feature Update; white balanace
 #  v0.04 (2025/3/23)    Feature Update; identify  white color, black color
 #  v0.05 (2025/3/30)    Feature Update; change COLOR LED RING (12 LEDS)
+#  v0.06 (2025/4/6)     Feature Update; add color name, check facing target or not
 #
 
 import time
@@ -36,10 +37,10 @@ CTRL_INTEG_FIX_MODE  = 0b0000_0000
 
 HIGH_GAIN = 0b0000_1000
 LOW_GAIN = 0x00
-INTEGRATIN_TIME_LONG = 0b11        #  11:179.2ms
-INTEGRATIN_TIME_SL_LONG = 0b10
-INTEGRATIN_TIME_SL_SHORT = 0b01
-INTEGRATIN_TIME_SHORT = 0b00
+INTEGRATION_TIME_LONG = 0b11        #  11:179.2ms
+INTEGRATION_TIME_SL_LONG = 0b10     #  10:22.4ms
+INTEGRATION_TIME_SL_SHORT = 0b01    #  01:1.4ms 
+INTEGRATION_TIME_SHORT = 0b00       #  00:87.5us
 
 # default whilte balance (max value when white paper is set)
 WHITE_BALANCE = {'r': 5725, 'g': 6345, 'b': 5894, }
@@ -52,7 +53,6 @@ LED_PIN = 0
 WB_SW_PIN = 1
 
 OPEN_BLIGHTNESS = 0.20
-
 
 
 def init_sensor(i2c):
@@ -87,12 +87,13 @@ def update_white_balance(i2c):
     print('put white paper on the color senser')
     time.sleep(1)  # wait for 1sec
     # set default params
-    ctrl_params = HIGH_GAIN + INTEGRATIN_TIME_SL_LONG  # HIGH and 10 (22.4ms)
+    ctrl_params = HIGH_GAIN + INTEGRATION_TIME_SL_LONG  # HIGH and 10 (22.4ms)
     set_control_reg(i2c, ctrl_params)  
     samples = []
-    for _ in range(20):   #get 20 samples
+    for _ in range(5):   #get 5 samples
         (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
-        time.sleep_ms(200)     # wait 200msec
+        #time.sleep_ms(int(179.2 * 3 ))     # wait 179.2 * 3
+        time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
         print(raw_r, raw_g, raw_b, adjust)
         samples.append((raw_r, raw_g, raw_b, adjust))
     center_value = median_filter(samples)
@@ -122,17 +123,17 @@ def sensor_start(i2c ,np):
     np_light_on(np)    
 
     #set_control_reg(i2c, 0x89)   # RESET,High gain 1.4ms
-    ctrl_params = 0x80 + HIGH_GAIN + INTEGRATIN_TIME_SL_LONG   # RESET,High gain
+    ctrl_params = 0x80 + HIGH_GAIN + INTEGRATION_TIME_SL_LONG   # RESET,High gain
     set_control_reg(i2c, ctrl_params)  
-    ctrl_params = HIGH_GAIN + INTEGRATIN_TIME_SL_LONG   # startsensing
+    ctrl_params = HIGH_GAIN + INTEGRATION_TIME_SL_LONG   # startsensing
     set_control_reg(i2c, ctrl_params)  
 
     while True:
         if wb_mode:
             update_white_balance(i2c)
             wb_mode = False
-        #time.sleep_ms(179.2 * 5)
-        time.sleep(1)
+        #time.sleep_ms(int(179.2 * 3 + 100.0))
+        time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
         (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
         print('-------------------------------------')
         print(f'raw:{raw_r}({raw_r:04x}), {raw_g}({raw_g:04x}), {raw_b}({raw_g:04x}) {adjust}({adjust:04x})')
@@ -142,9 +143,34 @@ def sensor_start(i2c ,np):
         print(f'norm: R: {norm_r}, G: {norm_g}, B: {norm_b}')
         (hue, sat, brt) = rgb2hsv(norm_r, norm_g, norm_b)
         print(f"Hue: {hue}, Sat: {sat}, Brt: {brt}")
-        print(hsb2cw(hue,sat,brt))
+
+        if brt < OPEN_BLIGHTNESS  and (not is_reflection(adjust)):   # if open (blightness of open)
+              print('not facing')
+        else:
+              print(hsb2cw(hue,sat,brt))
+
         if(brt > 1.5):
-           print("wb!")
+           print("please set WB")
+
+        time.sleep(0.5)
+
+#
+# check reflection
+#
+REFLECT_THRESHOLD = 10
+def is_reflection(prev_adjust):
+    np_light_on(np, brightness=10)      # set dimmer
+    #time.sleep_ms(int(179.2 * 3 ))     # wait 179.2 * 3
+    #time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
+    time.sleep_ms(int(22.4 * 3 + 200))       # wait 22.4 * 3
+    (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
+    np_light_on(np)
+    diff = abs(prev_adjust - adjust)
+    if diff >= REFLECT_THRESHOLD:
+         return True
+    else:
+         return False
+
 
 def rgb2hsv(r,g,b):
     max_val = max((r,g,b))
@@ -201,24 +227,52 @@ def np_light_on(np,brightness=20):
 # Munsell Color Wheel
 
 CW_BLACK_LEVEL_BRIGHTNESS = 0.10
-CW_WHITE_LEVEL_BRIGHTNESS = 0.3
-CW_WHITE_LEVEL_SATURATION = 0.2
+CW_WHITE_LEVEL_BRIGHTNESS = 0.8
+CW_WHITE_LEVEL_SATURATION = 0.1
 
-COLOR_WHEEL = ("5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5BG", "10BG", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP")
+COLOR_WHEEL = ( "5R", "10R", "5YR", "10YR", "5Y", "10Y", "5GY", "10GY", "5G", "10G", "5BG", "10BG", "5B", "10B", "5PB", "10PB", "5P", "10P", "5RP", "10RP" )
 
-def hsb2cw(h,s,b):
-  new_h = h + int(len(COLOR_WHEEL) / 2)
+COLOR_NAME = { 'R' : 'aka', 'YR' : 'daidai', 'Y' : 'ki', 'GY' : 'kimidori', 'G' : 'midori',
+               'BG' : 'aomidori','G' : 'midori','B' : 'ao','PB' : 'aomurasaki','p' : 'murasaki',
+               'RP' : 'akamurasaki' }
+
+
+  
+#h=360-10
+#new_h = h + int(360 / len(COLOR_WHEEL) / 2)
+#if new_h >= 360:
+#   new_h -= 360
+#idx = int(new_h / (360 / len(COLOR_WHEEL)))
+#COLOR_WHEEL[idx]
+
+
+
+
+
+#
+# convert (h, s, b) to color name
+#
+def hsb2cw(h, s, b):
+  new_h = h + int(360 / len(COLOR_WHEEL) / 2)
   if new_h >= 360:
      new_h -= 360
-  idx = int(new_h/len(COLOR_WHEEL))
+  idx = int(new_h / (360 / len(COLOR_WHEEL)))
   color_name = COLOR_WHEEL[idx]
   if b < CW_BLACK_LEVEL_BRIGHTNESS:     # if brightness is lower than 0.1 then black
      return('BK')
   if s < CW_WHITE_LEVEL_SATURATION  and b > CW_WHITE_LEVEL_BRIGHTNESS:
-     return(f'HW ({color_name})')
-  if b < OPEN_BLIGHTNESS:   # if open (blightness of open)
-     return f'None ({color_name})'  # not set color
+     return(f'HW')
   return color_name
+
+#
+# convert color_id to color name
+#
+def get_color_name(color_id):
+    stripped_color_id = re.sub('[0-9]*', '', color_id)  # remove number from color_id
+    if stripped_color_id in COLOR_NAME:
+        return COLOR_NAME[stripped_color_id]
+    else:
+        return None
 
 
 wb_mode = False
