@@ -359,7 +359,7 @@ def check_target_presence():
     while True:
        # turn on green
        np_light_green(np, brightness=2)
-       time.sleep(0.3)
+       time.sleep(0.5)   # Select a suitable value intuitively
        (raw_r, raw_g, raw_b, adjust_light) = read_rgb_regs(i2c)
        norm_r = raw_r / WHITE_BALANCE['r']
        norm_g = raw_g / WHITE_BALANCE['g']
@@ -368,7 +368,7 @@ def check_target_presence():
 
        # turn on blue
        np_light_blue(np, brightness=8)
-       time.sleep(0.3)
+       time.sleep(0.5)  # Select a suitable value intuitively
        (raw_r, raw_g, raw_b, adjust_light) = read_rgb_regs(i2c)
        norm_r = raw_r / WHITE_BALANCE['r']
        norm_g = raw_g / WHITE_BALANCE['g']
