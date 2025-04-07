@@ -6,7 +6,8 @@
 #  v0.04 (2025/3/23)    Feature Update; identify  white color, black color
 #  v0.05 (2025/3/30)    Feature Update; change COLOR LED RING (12 LEDS)
 #  v0.06 (2025/4/6)     Feature Update; add color name, check facing target or not
-#
+#  v0.07 (2025/4/7)     Feature Update; check target is persistence or not
+#                       bug fix:  wait time is not *3 but *4 (r,g,b,brightness)
 
 import time
 from machine import Pin
@@ -43,7 +44,8 @@ INTEGRATION_TIME_SL_SHORT = 0b01    #  01:1.4ms
 INTEGRATION_TIME_SHORT = 0b00       #  00:87.5us
 
 # default whilte balance (max value when white paper is set)
-WHITE_BALANCE = {'r': 5725, 'g': 6345, 'b': 5894, }
+WHITE_BALANCE = {'r': 6221, 'g': 7484, 'b': 6792, }
+                #{'r': 5725, 'g': 6345, 'b': 5894, }
 
 #LED_PIN : 0
 #WB_SW : 1
@@ -59,13 +61,20 @@ def init_sensor(i2c):
     set_control_reg(i2c, 0xe4)   # RESET,WAIT_MODE,MANUAL_SETTING_MODE
     set_manual_timing_reg(i2c, 0x0c,0x40)   #   Tint 00 , 546ms
 
+def setup_sensor(i2c):
+    ctrl_params = 0x80 + HIGH_GAIN + INTEGRATION_TIME_SL_LONG   # RESET,High gain
+    set_control_reg(i2c, ctrl_params)  
+    ctrl_params = HIGH_GAIN + INTEGRATION_TIME_SL_LONG   # startsensing
+    set_control_reg(i2c, ctrl_params)  
+
+
+
 def set_control_reg(i2c, data):
     bytes_data = bytes((data,))
     i2c.writeto_mem(I2C_ADDR, REG_CTRL, bytes_data)
 
 def read_control_reg(i2c):
     return i2c.readfrom_mem(I2C_ADDR, REG_CTRL, 1)[0]
-
 
 def set_manual_timing_reg(i2c, upper_byte, lower_byte):
     bytes_data = bytes((upper_byte, lower_byte))
@@ -92,8 +101,8 @@ def update_white_balance(i2c):
     samples = []
     for _ in range(5):   #get 5 samples
         (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
-        #time.sleep_ms(int(179.2 * 3 ))     # wait 179.2 * 3
-        time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
+        #time.sleep_ms(int(179.2 * 4 ))     # wait 179.2 * 4
+        time.sleep_ms(int(22.4 * 4 + 100))       # wait 22.4 * 4
         print(raw_r, raw_g, raw_b, adjust)
         samples.append((raw_r, raw_g, raw_b, adjust))
     center_value = median_filter(samples)
@@ -120,6 +129,8 @@ def median_filter(samples):
 def sensor_start(i2c ,np):
 
     global wb_mode
+    global is_target_presence
+
     np_light_on(np)    
 
     #set_control_reg(i2c, 0x89)   # RESET,High gain 1.4ms
@@ -132,8 +143,8 @@ def sensor_start(i2c ,np):
         if wb_mode:
             update_white_balance(i2c)
             wb_mode = False
-        #time.sleep_ms(int(179.2 * 3 + 100.0))
-        time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
+        #time.sleep_ms(int(179.2 * 4 + 100.0))
+        time.sleep_ms(int(22.4 * 4 + 100))       # wait 22.4 * 4
         (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
         print('-------------------------------------')
         print(f'raw:{raw_r}({raw_r:04x}), {raw_g}({raw_g:04x}), {raw_b}({raw_g:04x}) {adjust}({adjust:04x})')
@@ -141,11 +152,13 @@ def sensor_start(i2c ,np):
         norm_g = raw_g / WHITE_BALANCE['g']
         norm_b = raw_b / WHITE_BALANCE['b']
         print(f'norm: R: {norm_r}, G: {norm_g}, B: {norm_b}')
-        (hue, sat, brt) = rgb2hsv(norm_r, norm_g, norm_b)
+        (hue, sat, brt) = rgb2hsb(norm_r, norm_g, norm_b)
         print(f"Hue: {hue}, Sat: {sat}, Brt: {brt}")
 
         if brt < OPEN_BLIGHTNESS  and (not is_reflection(adjust)):   # if open (blightness of open)
               print('not facing')
+              is_target_presence = False
+              return
         else:
               print(hsb2cw(hue,sat,brt))
 
@@ -160,9 +173,9 @@ def sensor_start(i2c ,np):
 REFLECT_THRESHOLD = 10
 def is_reflection(prev_adjust):
     np_light_on(np, brightness=10)      # set dimmer
-    #time.sleep_ms(int(179.2 * 3 ))     # wait 179.2 * 3
-    #time.sleep_ms(int(22.4 * 3 + 100))       # wait 22.4 * 3
-    time.sleep_ms(int(22.4 * 3 + 200))       # wait 22.4 * 3
+    #time.sleep_ms(int(179.2 * 4 ))     # wait 179.2 * 4
+    #time.sleep_ms(int(22.4 * 4 + 100))       # wait 22.4 * 4
+    time.sleep_ms(int(22.4 * 4 + 200))       # wait 22.4 * 4
     (raw_r, raw_g, raw_b, adjust) = read_rgb_regs(i2c)
     np_light_on(np)
     diff = abs(prev_adjust - adjust)
@@ -172,7 +185,7 @@ def is_reflection(prev_adjust):
          return False
 
 
-def rgb2hsv(r,g,b):
+def rgb2hsb(r,g,b):
     max_val = max((r,g,b))
     min_val = min((r,g,b))
 
@@ -207,15 +220,16 @@ def neopixel_init(pin):
     np = NeoPixel(pin, 12)    # 12 LED RING
     return np
 
+def np_light_on(np, brightness=20):
+    rgb_brightness = (int(brightness * 1.7), int(brightness * 1.0), int(brightness * 0.9))
+    for i in range(len(np)):
+       np[i] = rgb_brightness
+    np.write()              
+
+
 def np_light_off(np):
     for i in range(len(np)):
        np[i] = (00, 00, 00)
-    np.write()              
-
-def np_light_on(np,brightness=20):
-    rgb_brightness = (int(brightness * 1.7), int(brightness * 1.0), int(brightness*0.9))
-    for i in range(len(np)):
-       np[i] = rgb_brightness
     np.write()              
 
 #
@@ -287,11 +301,14 @@ np = None
 wb_sw = None
 i2c = None
 
+is_target_presence = False
+
 def main():
 
     global np
     global wb_sw
     global i2c
+    global is_target_presence
 
     # setup for white balance sw
     wb_sw = Pin(WB_SW_PIN, Pin.IN, Pin.PULL_UP)
@@ -304,8 +321,65 @@ def main():
 
     i2c = I2C(1, scl=Pin(19), sda=Pin(18), freq=10_000) # OK??
     init_sensor(i2c)
-    sensor_start(i2c,np)
+    setup_sensor(i2c)
 
+    while True:
+        if is_target_presence:
+             sensor_start(i2c,np)
+        else:
+             is_target_presence = check_target_presence()
+             if not is_target_presence:
+                print('Please place the object you want to examine')
+
+
+
+def np_light_red(np, brightness=20):
+    rgb_brightness = (brightness, 0 , 0)
+    for i in range(len(np)):
+       np[i] = rgb_brightness
+    np.write()              
+
+
+def np_light_blue(np, brightness=20):
+    rgb_brightness = (0, 0 , brightness)
+    for i in range(len(np)):
+       np[i] = rgb_brightness
+    np.write()              
+
+def np_light_green(np, brightness=20):
+    rgb_brightness = (0, brightness, 0)
+    for i in range(len(np)):
+       np[i] = rgb_brightness
+    np.write()              
+
+
+THRESHOLD_COLOR_DIFF = 50
+
+def check_target_presence():
+    while True:
+       # turn on green
+       np_light_green(np, brightness=2)
+       time.sleep(0.3)
+       (raw_r, raw_g, raw_b, adjust_light) = read_rgb_regs(i2c)
+       norm_r = raw_r / WHITE_BALANCE['r']
+       norm_g = raw_g / WHITE_BALANCE['g']
+       norm_b = raw_b / WHITE_BALANCE['b']
+       (hue_in_g, sat, brt) = rgb2hsb(norm_r, norm_g, norm_b)
+
+       # turn on blue
+       np_light_blue(np, brightness=8)
+       time.sleep(0.3)
+       (raw_r, raw_g, raw_b, adjust_light) = read_rgb_regs(i2c)
+       norm_r = raw_r / WHITE_BALANCE['r']
+       norm_g = raw_g / WHITE_BALANCE['g']
+       norm_b = raw_b / WHITE_BALANCE['b']
+       (hue_in_b, sat, brt) = rgb2hsb(norm_r, norm_g, norm_b)
+       diff = abs(hue_in_g - hue_in_b)
+       #print(f'diff: {diff}')
+       if diff > THRESHOLD_COLOR_DIFF:
+           return True
+       else:
+           return False
 
 
 main()
