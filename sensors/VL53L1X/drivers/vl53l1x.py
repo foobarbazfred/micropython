@@ -1,15 +1,31 @@
 #
-# VL53L1X  V0.01 2025/4/20  1st proto type 
+# driver for VL53L1X 
+#   V0.01 2025/4/20  1st proto type 
+#   V0.02 2025/4/26  2nd proto
+#   V0.03 2025/4/26  refactor to class
 #
 #
-# https://qiita.com/t-a495/items/2e912da660916856e385
-# https://github.com/openmv/openmv/blob/master/scripts/libraries/vl53l1x.py
+# https://github.com/STMicroelectronics/STMems_Standard_C_drivers
 # https://github.com/adafruit/Adafruit_CircuitPython_VL53L1X/blob/ca9a18db70b14353301af435cba397844dbfba73/adafruit_vl53l1x.py
+# https://github.com/openmv/openmv/blob/master/scripts/libraries/vl53l1x.py
+# https://qiita.com/t-a495/items/2e912da660916856e385
+# https://github.com/rneurink/VL53L1X_ULD
+# https://github.com/rneurink/VL53L1X_ULD/blob/master/src/core/VL53L1X_api.cpp
+# https://github.com/embvm-drivers/ST-VL53L1X/blob/main/src/vl53l1x.cpp
 #
 
-from machine import I2C
-from machine import Pin
-import time
+
+# usage
+# from VL52L1X import vl53l1x
+# i2c = xxx
+# tof =  vl53l1x(i2c)
+# tof.start_ranging('long')
+# distance = tof.get_distance()
+# tof.stop_rangint()
+#
+
+
+VL51L1X_DEVICE_ADDR = 0x29
 
 VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
@@ -105,99 +121,251 @@ VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x40  # 0x87 : start ranging, use StartRanging() or StopRanging(), If you want an automatic start after VL53L1X_init() call, put 0x40 in location 0x87 */
 ))
 
+TB_SHORT_DIST = {
+    # ms: (MACROP_A_HI, MACROP_B_HI)
+    15: ((0x00, 0x1D), (0x00, 0x27)),
+    20: ((0x00, 0x51), (0x00, 0x6E)),
+    33: ((0x00, 0xD6), (0x00, 0x6E)),
+    50: ((0x01, 0xAE), (0x01, 0xE8)),
+    100: ((0x02, 0xE1), (0x03, 0x88)),
+    200: ((0x03, 0xE1), (0x04, 0x96)),
+    500: ((0x05, 0x91), (0x05, 0xC1)),
+}
 
-_VL53L1X_I2C_SLAVE_DEVICE_ADDRESS = const(0x0001)
-_VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND = const(0x0008)
-_GPIO_HV_MUX__CTRL = const(0x0030)
-_GPIO__TIO_HV_STATUS = const(0x0031)
-_RANGE_CONFIG__TIMEOUT_MACROP_A_HI = const(0x005E)
-_RANGE_CONFIG__VCSEL_PERIOD_A = const(0x0060)
-_RANGE_CONFIG__TIMEOUT_MACROP_B_HI = const(0x0061)
-_RANGE_CONFIG__VCSEL_PERIOD_B = const(0x0063)
-_RANGE_CONFIG__VALID_PHASE_HIGH = const(0x0069)
-_SD_CONFIG__WOI_SD0 = const(0x0078)
-_SD_CONFIG__INITIAL_PHASE_SD0 = const(0x007A)
-_ROI_CONFIG__USER_ROI_CENTRE_SPAD = const(0x007F)
-_ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE = const(0x0080)
-_SYSTEM__INTERRUPT_CLEAR = const(0x0086)
+TB_LONG_DIST = {
+    # ms: (MACROP_A_HI, MACROP_B_HI)
+    20: ((0x00, 0x1E), (0x00, 0x22)),
+    33: ((0x00, 0x60), (0x00, 0x6E)),
+    50: ((0x00, 0xAD), (0x00, 0xC6)),
+    100: ((0x01, 0xCC), (0x01, 0xEA)),
+    200: ((0x02, 0xD9), (0x02, 0xF8)),
+    500: ((0x04, 0x8F), (0x04, 0xA4)),
+}
 
-
-_VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0 = const(0x0096)
-_VL53L1X_IDENTIFICATION_MODEL_ID = const(0x010F)
-
-
-REG_RESULT_RANGE_STATUS = 0x0089
+REG_PAD_I2C_HV_CONFIG =   0x002D
+REG_GPIO_HV_MUX_CTRL = 0x0030
+REG_GPIO_TIO_HV_STATUS = 0x0031
 REG_PHASECAL_CONFIG_TIMEOUT_MACROP = 0x004B
+REG_RANGE_CONFIG_TIMEOUT_MACROP_A_HI = 0x005E
+REG_RANGE_CONFIG_VCSEL_PERIOD_A = 0x0060
+REG_RANGE_CONFIG_TIMEOUT_MACROP_B_HI = 0x0061
+REG_RANGE_CONFIG_VCSEL_PERIOD_B = 0x0063
+REG_RANGE_CONFIG_VALID_PHASE_HIGH = 0x0069
+REG_SD_CONFIG_WOI_SD0 = 0x0078
+REG_SD_CONFIG_INITIAL_PHASE_SD0 = 0x007A
+REG_SYSTEM_INTERRUPT_CLEAR = 0x0086
 REG_SYSTEM_MODE_START = 0x0087
+REG_RESULT_RANGE_STATUS = 0x0089
+REG_RESULT_FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0 = 0x0096
 REG_IDENTIFICATION_MODEL_ID = 0x010F
 
 
+class vl53l1x:
+
+    def __init__(self, i2c):
+        self._current_timing_budget = 50   # 50msec
+        self.i2c = i2c;    
+
+        # check connection
+        if len(self.i2c.scan()) > 0 and i2c.scan()[0] == VL51L1X_DEVICE_ADDR:
+             print('device connection is ok')
+        else:
+             print('Error, can not find device')
+             return False # ok??
+    
+        # check model type
+        model_id, model_type, mask_rev = self.get_model_info()
+        if model_id != 0xEA or model_type != 0xCC:
+            print(f'model ID or model type is not correct')
+            print(f'ID:0x{model_id:02X}, type:0x{model_type:02X} req:(0xEA 0xCC)')
+            print(f'check device')
+            return False  # ok??
+
+        self._device_setup()
+
+    def start_measurement(self):
+        self._write_reg(REG_SYSTEM_MODE_START, bytes((0x40,)))
+    
+    def stop_measurement(self):
+        self._write_reg(REG_SYSTEM_MODE_START, bytes((0x00,)))
+    
+    #
+    # read registers and returns distance (cm)
+    #
+    def get_distance(self):
+        value = self._read_reg(REG_RESULT_FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0, 2)
+        distance = ((value[0] << 8) + value[1]) / 10
+        return distance
+    
+    def clear_interrupt(self):
+        self._write_reg(REG_SYSTEM_INTERRUPT_CLEAR, bytes((0x01,)))
+    
+    def get_data_ready(self):
+        val = self._read_reg(REG_GPIO_TIO_HV_STATUS, 1)[0]
+        if (val & 0x01) == self._get_interrupt_polarity():
+            return True
+        else:
+            return False
+    
+    #
+    # check distance mode and return setting
+    # 'short':  short distance mode
+    # 'long':  long distance mode
+    #
+    def get_distance_mode(self):
+        value = self._read_reg(REG_PHASECAL_CONFIG_TIMEOUT_MACROP, 1)[0]  # read 1byte
+        if value == 0x14:
+           return 'short'        # short distance
+        elif value == 0x0A:
+           return 'long'         # long distance
+        else:
+           print('internal error in get_distance')
+           return False          # unknown setting
+    
+    # set distance mode
+    #
+    # 'long' :  long distance mode
+    # 'short':  short distance mode
+    #
+    def set_distance_mode(self, distance_mode):
+    
+        if distance_mode == 'long':
+            self._write_reg(REG_PHASECAL_CONFIG_TIMEOUT_MACROP, bytes((0x0A,)))
+            self._write_reg(REG_RANGE_CONFIG_VCSEL_PERIOD_A, bytes((0x0F,)))
+            self._write_reg(REG_RANGE_CONFIG_VCSEL_PERIOD_B, bytes((0x0D,)))
+            self._write_reg(REG_RANGE_CONFIG_VALID_PHASE_HIGH, bytes((0xB8,)))
+            self._write_reg(REG_SD_CONFIG_WOI_SD0, bytes((0x0F, 0x0D)))
+            self._write_reg(REG_SD_CONFIG_INITIAL_PHASE_SD0, bytes((0x0E, 0x0E)))
+            self._set_timing_budget(distance_mode)
+    
+        elif distance_mode == 'short':
+            self._write_reg(REG_PHASECAL_CONFIG_TIMEOUT_MACROP, bytes((0x14,)))
+            self._write_reg(REG_RANGE_CONFIG_VCSEL_PERIOD_A, bytes((0x07,)))
+            self._write_reg(REG_RANGE_CONFIG_VCSEL_PERIOD_B, bytes((0x05,)))
+            self._write_reg(REG_RANGE_CONFIG_VALID_PHASE_HIGH, bytes((0x38,)))
+            self._write_reg(REG_SD_CONFIG_WOI_SD0, bytes((0x07, 0x05)))
+            self._write_reg(REG_SD_CONFIG_INITIAL_PHASE_SD0, bytes((0x06, 0x06)))
+            self._set_timing_budget(distance_mode)
+    
+        else:
+           print(f'Error: Invalid distance_mode: {distance_mode}')
+           return False
+    
+
+    # >>> read_model_id()
+    # 60108
+    # >>> hex(read_model_id())
+    # '0xeacc'
+    #
+    # return  ModelID, Model Type, MaskRev
+    # '0xea' '0xcc' '0x10'
+    def get_model_info(self):
+        value = self._read_reg(REG_IDENTIFICATION_MODEL_ID, 3)  # read 3bytes
+        return value[0], value[1], value[2]
+    
+
+    #------------------------------------------
+    #  private functions
+    #------------------------------------------
+
+    #
+    # setup VL53L1X 
+    #
+    def _device_setup(self):
+        # model type is ok, then setup
+        self._write_reg(REG_PAD_I2C_HV_CONFIG, VL51L1X_DEFAULT_CONFIGURATION)
+        time.sleep_ms(200)
+        self.set_distance_mode('long')
+
+    #
+    # returns interrupt polarity
+    #
+    #
+    def _get_interrupt_polarity(self):
+        val = self._read_reg(REG_GPIO_HV_MUX_CTRL, 1)[0]
+        if (val & 0x10) == 1:
+           return 0
+        else:
+           return 1
+    
+    #
+    # set timing_budget according to distance mode and timing
+    #
+    def _set_timing_budget(self, distance_mode, new_timing = None):
+
+        if new_timing:
+           timing = new_timing
+        else:
+           timing = self._current_timing_budget
+    
+        if distance_mode == 'short':
+            reg_vals = TB_SHORT_DIST
+        elif distance_mode == 'long':
+            reg_vals = TB_LONG_DIST
+        else:
+            print("Unknown distance mode.")
+            return False
+    
+        if timing not in reg_vals:
+            print("Invalid timing budget.")
+            return False
+    
+        self._write_reg(REG_RANGE_CONFIG_TIMEOUT_MACROP_A_HI, bytes((reg_vals[timing][0])))
+        self._write_reg(REG_RANGE_CONFIG_TIMEOUT_MACROP_B_HI, bytes((reg_vals[timing][1])))
+
+        if new_timing:
+            self._current_timing_budget = new_timing
+    
+        return True
+    
+    #
+    # reg_addr:  read register address
+    # size:      read size
+    # return: bytes (size of bytes is specified size)
+    #
+    def _read_reg(self, reg_addr, size):
+        data = self.i2c.readfrom_mem(DEVICE_ADDR, reg_addr, size, addrsize=16)
+        return data
+    
+    #
+    # reg_addr:  read register address
+    # value:     bytes data
+    # return None
+    #
+    def _write_reg(self, reg_addr, value):
+        self.i2c.writeto_mem(DEVICE_ADDR, reg_addr, value, addrsize=16)
+    
 
 #
-# reg_addr:  read register address
-# size:      read size
-# return bytes (size of bytes is specified size)
+# end of file
 #
-def read_reg(reg_addr, size):
-    data = i2c.readfrom_mem(DEVICE_ADDR, reg_addr, size, addrsize=16)
-    return data
-
-def write_reg(reg_addr, value):
-    i2c.writeto_mem(DEVICE_ADDR, reg_addr, value, addrsize=16)
 
 
-# >>> read_model_id()
-# 60108
-# >>> hex(read_model_id())
-# '0xeacc'
-def read_model_id():
-    value = read_reg(REG_IDENTIFICATION_MODEL_ID, 2)  # read 2byte
-    return (value[0] << 8) + value[1]
-   
-#def reset():
-#     write_reg(0x0000, bytes(0x00,))
-#     time.sleep_ms(100)             # machine.lightsleep(100)
-#     write_reg(0x0000, bytes(0x01,))
 
-def __init__():
-     #reset()
-     time.sleep_ms(1)
-     if read_model_id() != 0xEACC:
-           raise RuntimeError('Failed to find expected ID register values. Check wiring!')
-     write_reg(0x002D, VL51L1X_DEFAULT_CONFIGURATION)
-     #write_reg(0x001E, read_reg(0x0022) * 4)  # <<<???
-     time.sleep_ms(200)
+    
 
 #
-# check distance mode and return setting
-# 1:  short distance mode
-# 2:  long distance mode
-#
-def get_distance_mode():
-    value = read_reg(REG_PHASECAL_CONFIG_TIMEOUT_MACROP, 1)[0]  # read 1byte
-    if value == 0x14:
-       return 1        # short distance
-    elif value == 0x0A:
-       return 2        # long distance
-    else:
-       None            # unknown setting
-
-def get_distance():
-    data = read_reg(REG_RESULT_RANGE_STATUS, 17)
-    #range_status = data[0]
-    #stream_count = data[2]
-    final_crosstalk_corrected_range_mm_sd0 = (data[13] << 8) + data[14]
-    return final_crosstalk_corrected_range_mm_sd0 / 10
-
-
-#__init__()
-
-
-DEVICE_ADDR = 0x29
-i2c = I2C(0)   # default setting :  scl=Pin(5), sda=Pin(4)
-__init__()
-
-while True:
-  print(f"dist: {get_distance()} cm")
-  time.sleep(0.5)
-
+#   # sample
+#   #
+#   
+#   from machine import I2C
+#   from machine import Pin
+#   import time
+#   
+#   
+#   i2c = I2C(0)   # default setting :  scl=Pin(5), sda=Pin(4)
+#   
+#   __init__(i2c)
+#   
+#   set_distance_mode('long')
+#   start_measurement()
+#   
+#   while True:
+#     if get_data_ready():
+#        print(f"dist: {get_distance()} cm")
+#        clear_interrupt()
+#        #time.sleep(0.5)
+#     else:
+#        time.sleep_ms(50)
+#   
+#   stop_measurement()
