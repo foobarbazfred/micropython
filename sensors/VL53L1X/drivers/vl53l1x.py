@@ -18,16 +18,6 @@
 
 import time
 
-# usage
-# from VL52L1X import vl53l1x
-# i2c = xxx
-# tof =  vl53l1x(i2c)
-# tof.start_ranging('long')
-# distance = tof.get_distance()
-# tof.stop_rangint()
-#
-
-
 VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
   0x00, # 0x2e : bit 0 if I2C pulled up at 1.8V, else set bit 0 to 1 (pull up at AVDD) */
