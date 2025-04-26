@@ -1,11 +1,11 @@
 import time
 from machine import Pin
-from hc-sr04 import HC-SR04
+from hc_sr04 import HC_SR04
 
 LCD_AVAILABLE = True
 trig = Pin(14, Pin.OUT)
 echo = Pin(15, Pin.IN)
-hc_sr04 = HC-SR04(trig,echo)
+hc_sr04 = HC_SR04(trig,echo)
 
 if LCD_AVAILABLE:
    from st7032 import ST7032LCD
