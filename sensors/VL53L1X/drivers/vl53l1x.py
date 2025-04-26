@@ -14,6 +14,7 @@
 # https://github.com/embvm-drivers/ST-VL53L1X/blob/main/src/vl53l1x.cpp
 #
 
+import time
 
 # usage
 # from VL52L1X import vl53l1x
@@ -24,8 +25,6 @@
 # tof.stop_rangint()
 #
 
-
-VL51L1X_DEVICE_ADDR = 0x29
 
 VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
@@ -160,14 +159,17 @@ REG_RESULT_FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0 = 0x0096
 REG_IDENTIFICATION_MODEL_ID = 0x010F
 
 
+VL51L1X_DEVICE_ADDR = 0x29
+
 class vl53l1x:
 
-    def __init__(self, i2c):
+    def __init__(self, i2c,device_addr = VL51L1X_DEVICE_ADDR):
         self._current_timing_budget = 50   # 50msec
-        self.i2c = i2c;    
+        self._device_addr = device_addr
+        self._i2c = i2c;    
 
         # check connection
-        if len(self.i2c.scan()) > 0 and i2c.scan()[0] == VL51L1X_DEVICE_ADDR:
+        if len(self._i2c.scan()) > 0 and i2c.scan()[0] == self._device_addr:
              print('device connection is ok')
         else:
              print('Error, can not find device')
@@ -324,7 +326,7 @@ class vl53l1x:
     # return: bytes (size of bytes is specified size)
     #
     def _read_reg(self, reg_addr, size):
-        data = self.i2c.readfrom_mem(DEVICE_ADDR, reg_addr, size, addrsize=16)
+        data = self._i2c.readfrom_mem(self._device_addr, reg_addr, size, addrsize=16)
         return data
     
     #
@@ -333,39 +335,9 @@ class vl53l1x:
     # return None
     #
     def _write_reg(self, reg_addr, value):
-        self.i2c.writeto_mem(DEVICE_ADDR, reg_addr, value, addrsize=16)
+        self._i2c.writeto_mem(self._device_addr, reg_addr, value, addrsize=16)
     
 
 #
 # end of file
 #
-
-
-
-    
-
-#
-#   # sample
-#   #
-#   
-#   from machine import I2C
-#   from machine import Pin
-#   import time
-#   
-#   
-#   i2c = I2C(0)   # default setting :  scl=Pin(5), sda=Pin(4)
-#   
-#   __init__(i2c)
-#   
-#   set_distance_mode('long')
-#   start_measurement()
-#   
-#   while True:
-#     if get_data_ready():
-#        print(f"dist: {get_distance()} cm")
-#        clear_interrupt()
-#        #time.sleep(0.5)
-#     else:
-#        time.sleep_ms(50)
-#   
-#   stop_measurement()
