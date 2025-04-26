@@ -4,6 +4,7 @@
 #   V0.02 2025/4/26  2nd proto
 #   V0.03 2025/4/26  refactor to class
 #   V0.04 2025/4/26  bug fix  _get_interrupt_polarity()
+#   V0.05 2025/4/26  refactor:  change class name 
 #
 #
 # https://github.com/STMicroelectronics/STMems_Standard_C_drivers
@@ -162,7 +163,7 @@ REG_IDENTIFICATION_MODEL_ID = 0x010F
 
 VL51L1X_DEVICE_ADDR = 0x29
 
-class vl53l1x:
+class VL53L1X:
 
     def __init__(self, i2c,device_addr = VL51L1X_DEVICE_ADDR):
         self._current_timing_budget = 50   # 50msec
