@@ -3,6 +3,7 @@
 #   V0.01 2025/4/20  1st proto type 
 #   V0.02 2025/4/26  2nd proto
 #   V0.03 2025/4/26  refactor to class
+#   V0.04 2025/4/26  bug fix  _get_interrupt_polarity()
 #
 #
 # https://github.com/STMicroelectronics/STMems_Standard_C_drivers
@@ -15,6 +16,16 @@
 #
 
 import time
+
+# usage
+# from VL52L1X import vl53l1x
+# i2c = xxx
+# tof =  vl53l1x(i2c)
+# tof.start_ranging('long')
+# distance = tof.get_distance()
+# tof.stop_rangint()
+#
+
 
 VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
@@ -275,10 +286,10 @@ class vl53l1x:
     #
     def _get_interrupt_polarity(self):
         val = self._read_reg(REG_GPIO_HV_MUX_CTRL, 1)[0]
-        if (val & 0x10) == 1:
-           return 0
-        else:
+        if (val & 0x10) == 0:
            return 1
+        else:
+           return 0
     
     #
     # set timing_budget according to distance mode and timing
