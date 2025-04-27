@@ -22,7 +22,8 @@ tof.set_distance_mode(distance_mode)
 tof.start_measurement()
 
 while True:
-  if tof.get_data_ready():
+  state = tof.wait_data_ready():
+  if state:
      distance = tof.get_distance()
      print(f"dist: {distance} cm")
      lcd.cls()
@@ -30,7 +31,11 @@ while True:
      tof.clear_interrupt()
      time.sleep(1)
   else:
-     time.sleep_ms(100)
+     print("Error: sensor error!!")
+     print("Measurement failed")
+     lcd.cls()
+     lcd.print(f"Error!!\nMeasure fail")
+     time.sleep(1)
 
 tof.stop_measurement()
 
