@@ -7,7 +7,7 @@ from machine import Pin
 import time
 from vl53l1x import VL53L1X
 
-i2c = I2C(0)   # default setting :  scl=Pin(5), sda=Pin(4)
+i2c = I2C(0, scl=Pin(5), sda=Pin(4),  freq=400_000, timeout=50_000) 
 tof = VL53L1X(i2c)
 
 tof.set_distance_mode('long')
