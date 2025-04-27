@@ -26,7 +26,7 @@ while True:
      distance = tof.get_distance()
      print(f"dist: {distance} cm")
      lcd.cls()
-     lcd.print(f"dist:{distance}\nmode:{distance_mode}")
+     lcd.print(f"dist:{distance} cm\nmode:{distance_mode}")
      tof.clear_interrupt()
      time.sleep(1)
   else:
