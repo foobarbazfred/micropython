@@ -1,0 +1,30 @@
+async function readLines(port) {
+    const textDecoder = new TextDecoderStream();
+    const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+    const reader = textDecoder.readable.getReader();
+
+    let buffer = '';
+
+    try {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+                console.log('Stream closed');
+                break;
+            }
+            buffer += value;
+
+            let lines = buffer.split('\n');
+            buffer = lines.pop(); // 最後は改行されてない残りなので保持する
+
+            for (const line of lines) {
+                console.log('Received line:', line.trim());
+                // ここで一行ずつ処理できる
+            }
+        }
+    } catch (error) {
+        console.error('Read error:', error);
+    } finally {
+        reader.releaseLock();
+    }
+}
