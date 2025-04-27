@@ -28,6 +28,7 @@ while True:
      lcd.cls()
      lcd.print(f"dist:{distance}\nmode:{distance_mode}")
      tof.clear_interrupt()
+     time.sleep(1)
   else:
      time.sleep_ms(100)
 
