@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js + Web Serial API デモ</title>
+    <script type="module" src="test.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <button id="connectButton">RPi Picoと接続</button>
+    <script>
+        document.querySelector("#connectButton").addEventListener("click", async () => {
+            try {
+                const port = await navigator.serial.requestPort();  // ユーザー操作の直後に呼び出す
+                await port.open({ baudRate: 115200 });
+                /*const reader = port.readable.getReader();*/
+                const reader = port.readable.pipeThrough(new TextDecoderStream()).getReader();
+                while (true) {
+                    const { value, done } = await reader.read();
+                    oneline = value.trim();
+                    if (done) break;
+                    //const text = new TextDecoder().decode(value);
+                    console.log(oneline);
+                    const [x, y, z] = oneline.split(',').map(Number);
+                    window.cube.rotation.x = x;
+                    window.cube.rotation.y = y;
+                    window.cube.rotation.z = z;
+                }
+            } catch (error) {
+                console.error("Serial Error:", error);
+            }
+        });
+        </script>
+</body>
+</html>
