@@ -14,7 +14,7 @@ tof.set_distance_mode('long')
 tof.start_measurement()
 
 while True:
-  state = tof.wait_data_ready():
+  state = tof.wait_data_ready()
   if state:
      print(f"dist: {tof.get_distance()} cm")
      tof.clear_interrupt()
