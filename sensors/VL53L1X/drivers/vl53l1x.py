@@ -236,7 +236,7 @@ class VL53L1X:
                return True
             else:
                time.wait_ms(self._current_timing_budget)
-         return False
+        return False
 
     #
     # check distance mode and return setting
