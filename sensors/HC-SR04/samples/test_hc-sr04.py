@@ -17,7 +17,7 @@ while True:
   distance, pulse_width = hc_sr04.measure()   # 
   #print(pulse_width)
 
-  report = f"dist: {distance:0.2f}cm\npulse: {pulse_width}usec"
+  report = f"dist: {distance:0.2f} cm\npulse: {pulse_width} usec"
   print("-------------------")
   print(report)
   if LCD_AVAILABLE:
