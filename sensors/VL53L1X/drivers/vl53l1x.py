@@ -5,19 +5,22 @@
 #   V0.03 2025/4/26  refactor to class
 #   V0.04 2025/4/26  bug fix  _get_interrupt_polarity()
 #   V0.05 2025/4/26  refactor:  change class name 
+#   V0.06 2025/4/26  refactor:  
+#   V0.06 2025/4/26  refactor:  add function , wait_data_ready()
 #
-#
-# https://github.com/STMicroelectronics/STMems_Standard_C_drivers
-# https://github.com/adafruit/Adafruit_CircuitPython_VL53L1X/blob/ca9a18db70b14353301af435cba397844dbfba73/adafruit_vl53l1x.py
-# https://github.com/openmv/openmv/blob/master/scripts/libraries/vl53l1x.py
-# https://qiita.com/t-a495/items/2e912da660916856e385
-# https://github.com/rneurink/VL53L1X_ULD
-# https://github.com/rneurink/VL53L1X_ULD/blob/master/src/core/VL53L1X_api.cpp
-# https://github.com/embvm-drivers/ST-VL53L1X/blob/main/src/vl53l1x.cpp
+# List of referenced sources used in the development of this code
+#   https://github.com/adafruit/Adafruit_CircuitPython_VL53L1X/blob/ca9a18db70b14353301af435cba397844dbfba73/adafruit_vl53l1x.py
+#   https://github.com/openmv/openmv/blob/master/scripts/libraries/vl53l1x.py
+#   https://github.com/rneurink/VL53L1X_ULD/blob/master/src/core/VL53L1X_api.cpp
+#   https://github.com/embvm-drivers/ST-VL53L1X/blob/main/src/vl53l1x.cpp
+#   https://qiita.com/t-a495/items/2e912da660916856e385
 #
 
 import time
 
+#
+# note: Reusing VL51L1X configuration parameters
+#
 VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
   0x00, # 0x2e : bit 0 if I2C pulled up at 1.8V, else set bit 0 to 1 (pull up at AVDD) */
@@ -108,9 +111,13 @@ VL51L1X_DEFAULT_CONFIGURATION = bytes((
   0x00, # 0x83 : not user-modifiable */
   0x00, # 0x84 : not user-modifiable */
   0x01, # 0x85 : not user-modifiable */
-  0x01, # 0x86 : clear interrupt, use ClearInterrupt() */
-  0x40  # 0x87 : start ranging, use StartRanging() or StopRanging(), If you want an automatic start after VL53L1X_init() call, put 0x40 in location 0x87 */
+  0x01, # 0x86 : clear interrupt, 0x01=clear 
+  0x00  # 0x87 : ranging  0x00=stop, 0x40=start
 ))
+
+#
+# Definition of timing budget parameters
+#
 
 TB_SHORT_DIST = {
     # ms: (MACROP_A_HI, MACROP_B_HI)
@@ -133,6 +140,10 @@ TB_LONG_DIST = {
     500: ((0x04, 0x8F), (0x04, 0xA4)),
 }
 
+
+#
+# Definition of register addresses
+#
 REG_PAD_I2C_HV_CONFIG =   0x002D
 REG_GPIO_HV_MUX_CTRL = 0x0030
 REG_GPIO_TIO_HV_STATUS = 0x0031
@@ -151,21 +162,22 @@ REG_RESULT_FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0 = 0x0096
 REG_IDENTIFICATION_MODEL_ID = 0x010F
 
 
-VL51L1X_DEVICE_ADDR = 0x29
+VL53L1X_DEVICE_ADDR = 0x29
+RETRY_TIME_OUT = 3000   # retry time out (3sec)
 
 class VL53L1X:
 
-    def __init__(self, i2c,device_addr = VL51L1X_DEVICE_ADDR):
+    def __init__(self, i2c, device_addr = VL53L1X_DEVICE_ADDR): 
         self._current_timing_budget = 50   # 50msec
         self._device_addr = device_addr
-        self._i2c = i2c;    
+        self._i2c = i2c
 
         # check connection
         if len(self._i2c.scan()) > 0 and i2c.scan()[0] == self._device_addr:
-             print('device connection is ok')
+            print('device connection is ok')
         else:
-             print('Error, can not find device')
-             return False # ok??
+            print('Error, can not find device')
+            return False # must be changed to raise exception
     
         # check model type
         model_id, model_type, mask_rev = self.get_model_info()
@@ -173,7 +185,7 @@ class VL53L1X:
             print(f'model ID or model type is not correct')
             print(f'ID:0x{model_id:02X}, type:0x{model_type:02X} req:(0xEA 0xCC)')
             print(f'check device')
-            return False  # ok??
+            return False   # must be changed to raise exception
 
         self._device_setup()
 
@@ -185,6 +197,9 @@ class VL53L1X:
     
     #
     # read registers and returns distance (cm)
+    # Usage notes:
+    #    check data is ready before calling this function
+    #    e.g.  get_data_ready()  or wait_data_ready()
     #
     def get_distance(self):
         value = self._read_reg(REG_RESULT_FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0, 2)
@@ -194,6 +209,13 @@ class VL53L1X:
     def clear_interrupt(self):
         self._write_reg(REG_SYSTEM_INTERRUPT_CLEAR, bytes((0x01,)))
     
+    #
+    # check data is ready or not 
+    # (not wait until data is ready)
+    #
+    # return value
+    #   True  ... measured data is ready
+    #   False ... measured data is not ready
     def get_data_ready(self):
         val = self._read_reg(REG_GPIO_TIO_HV_STATUS, 1)[0]
         if (val & 0x01) == self._get_interrupt_polarity():
@@ -202,24 +224,41 @@ class VL53L1X:
             return False
     
     #
+    # wait until data is ready
+    # return value
+    #   True  ... measured data is ready
+    #   False ... measured data is not ready in retry time
+    #
+    def wait_data_ready(self, timeout=RETRY_TIME_OUT):
+        retry_count = int(timeout / self._current_timing_budget)
+        for _ in range(retry_count):
+            if self.get_data_ready():
+               return True
+            else:
+               time.wait_ms(self._current_timing_budget)
+         return False
+
+    #
     # check distance mode and return setting
-    # 'short':  short distance mode
-    # 'long':  long distance mode
+    # return value
+    #   'short':  short distance mode
+    #   'long':  long distance mode
     #
     def get_distance_mode(self):
         value = self._read_reg(REG_PHASECAL_CONFIG_TIMEOUT_MACROP, 1)[0]  # read 1byte
         if value == 0x14:
-           return 'short'        # short distance
+            return 'short'        # short distance
         elif value == 0x0A:
-           return 'long'         # long distance
+            return 'long'         # long distance
         else:
-           print('internal error in get_distance')
-           return False          # unknown setting
+            print('internal error in get_distance')
+            return False          # unknown setting
     
+    # 
     # set distance mode
-    #
-    # 'long' :  long distance mode
-    # 'short':  short distance mode
+    # argument:
+    #   'long' :  set long distance mode
+    #   'short':  set short distance mode
     #
     def set_distance_mode(self, distance_mode):
     
@@ -242,17 +281,16 @@ class VL53L1X:
             self._set_timing_budget(distance_mode)
     
         else:
-           print(f'Error: Invalid distance_mode: {distance_mode}')
-           return False
+            print(f'Error: Invalid distance_mode: {distance_mode}')
+            return False
     
 
-    # >>> read_model_id()
-    # 60108
-    # >>> hex(read_model_id())
-    # '0xeacc'
     #
-    # return  ModelID, Model Type, MaskRev
+    # get model info
+    # return value
+    #   tuple of  ModelID, Model Type, MaskRev
     # '0xea' '0xcc' '0x10'
+    #
     def get_model_info(self):
         value = self._read_reg(REG_IDENTIFICATION_MODEL_ID, 3)  # read 3bytes
         return value[0], value[1], value[2]
@@ -274,23 +312,22 @@ class VL53L1X:
     #
     # returns interrupt polarity
     #
-    #
     def _get_interrupt_polarity(self):
         val = self._read_reg(REG_GPIO_HV_MUX_CTRL, 1)[0]
         if (val & 0x10) == 0:
-           return 1
+            return 1
         else:
-           return 0
+            return 0
     
     #
-    # set timing_budget according to distance mode and timing
+    # set timing_budget according to distance mode and timing budget
     #
     def _set_timing_budget(self, distance_mode, new_timing = None):
 
         if new_timing:
-           timing = new_timing
+            timing = new_timing
         else:
-           timing = self._current_timing_budget
+            timing = self._current_timing_budget
     
         if distance_mode == 'short':
             reg_vals = TB_SHORT_DIST
