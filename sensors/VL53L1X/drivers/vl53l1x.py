@@ -235,7 +235,7 @@ class VL53L1X:
             if self.get_data_ready():
                return True
             else:
-               time.wait_ms(self._current_timing_budget)
+               time.sleep_ms(self._current_timing_budget)
         return False
 
     #
