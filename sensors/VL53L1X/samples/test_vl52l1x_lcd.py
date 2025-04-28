@@ -22,7 +22,7 @@ tof.set_distance_mode(distance_mode)
 tof.start_measurement()
 
 while True:
-  state = tof.wait_data_ready():
+  state = tof.wait_data_ready()
   if state:
      distance = tof.get_distance()
      print(f"dist: {distance} cm")
