@@ -22,6 +22,6 @@ while True:
   print(report)
   if LCD_AVAILABLE:
      lcd.print(report, cls=True)
-  time.sleep(0.5)
+  time.sleep(1)
 
-
+# end of file
