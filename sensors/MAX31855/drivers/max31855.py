@@ -1,7 +1,7 @@
 #
 # Driver for MAX31855
 # v0.01
-#
+# v0.02  bugfix: internal temperature convert
 
 #
 # define bit fields
@@ -86,11 +86,10 @@ class MAX31855:
         # check sign bit
         int_temp = 0
         if regs.int_temp & 0b1000_0000_0000:  # if minus flag is set
-             temp_2b = struct.pack('>h', regs.int_temp >> 4)  # extract only the integer part
+             temp_2b = struct.pack('>b', regs.int_temp >> 4)  # extract only the integer part
                                                               # and convert integer to byte array
              temp_ary = bytearray(temp_2b) 
-             #temp_ary[0] |= 0b1000_0000                   # no need Perform sign extension
-             int_temp = struct.unpack('>h',temp_ary)[0]    # convert byte array to interger
+             int_temp = struct.unpack('>b',temp_ary)[0]    # convert byte array to interger
         else:
              int_temp = regs.int_temp >> 4
         if self.verb:
