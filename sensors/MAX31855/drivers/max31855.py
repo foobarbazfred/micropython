@@ -1,6 +1,6 @@
 #
 # Driver for MAX31855
-#
+# v0.01
 #
 
 #
