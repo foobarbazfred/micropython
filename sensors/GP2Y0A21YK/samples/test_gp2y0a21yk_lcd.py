@@ -18,7 +18,7 @@ def main():
     adc = ADC(Pin(26))     
     gp2y = GP2Y0A21YK(adc)
 
-  while True:
+    while True:
         dist, vol = gp2y.measure_distance()
         if dist is None:
            dist = -1
