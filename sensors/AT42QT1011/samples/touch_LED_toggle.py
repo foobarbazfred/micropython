@@ -5,6 +5,12 @@
 # toggle the state flag control_state between True and False
 #
 
+#touch sensor board
+#  AT42QT1011 ... alternate mode touch switch
+#  AT42QT1012 ... momentary mode ouch switch
+#
+
+
 from machine import Pin
 import time
 
