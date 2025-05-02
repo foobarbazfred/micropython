@@ -22,7 +22,7 @@ GP_CLK = 2  # SPI0_CLK  : GP2 [4]
 GP_MOSI = 3 # SPI0_MOSI : GP3 [5]
 GP_MISO = 4 # SPI0_MISO : GP4 [6]
 GP_CS = 5   # SPI CS    : GP5 [7]
-SPI_CLK = 5_000_000  # SPI Clock 50KHz
+SPI_CLK = 5_000_000  # SPI Clock 500KHz
 
 
 
@@ -48,10 +48,10 @@ max31855 = MAX31855(spi, cs)
 # measure temprature and publish
 #
 while True:
-    (tc_temp, int_temp, status) = max31855.get_temperature()
+    tc_temp, int_temp, temp_NIST, status = max31855.get_temperature()
     if status == 'OK':
         msg = json.dumps({'temperature' : tc_temp})
-        (yy,mm,dd,hh,mm,ss, x, y ) = time.localtime()
+        (yy, mm, dd, hh, mm, ss, x, y ) = time.localtime()
         print('publish:', msg, f"at {hh+9}:{mm}:{ss}")
         client.publish(MQTT_TOPIC, msg)
     time.sleep(10)
