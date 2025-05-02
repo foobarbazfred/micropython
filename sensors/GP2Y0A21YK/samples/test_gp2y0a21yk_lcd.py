@@ -6,7 +6,7 @@ from machine import Pin
 from machine import I2C
 from st7032 import ST7032LCD
 
-# from gp2y0a21yk import GP2Y0A21YK
+from gp2y0a21yk import GP2Y0A21YK
 
 
 def main():
