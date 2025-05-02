@@ -69,7 +69,7 @@ class MAX31855:
         # convert signed # bit data  to float
         # check sign bit
         tc_temp = 0
-        if regs.tc_temp & 0b10_0000_0000_0000:  # if minus flag is set
+        if regs.tc_temp & 0b10_0000_0000_0000:  # if minus flag is set, convert to signed short
              temp_2b = struct.pack('>h', regs.tc_temp >> 2)  # extract only the integer part
                                                           # and convert integer to byte array
              temp_ary = bytearray(temp_2b) 
@@ -85,10 +85,10 @@ class MAX31855:
         # convert signed # bit data  to float
         # check sign bit
         int_temp = 0
-        if regs.int_temp & 0b1000_0000_0000:  # if minus flag is set
-             temp_2b = struct.pack('>b', regs.int_temp >> 4)  # extract only the integer part
+        if regs.int_temp & 0b1000_0000_0000:  # if minus flag is set, convert to signed byte
+             temp_1b = struct.pack('>b', regs.int_temp >> 4)  # extract only the integer part (8bit(1Byte))
                                                               # and convert integer to byte array
-             temp_ary = bytearray(temp_2b) 
+             temp_ary = bytearray(temp_1b) 
              int_temp = struct.unpack('>b',temp_ary)[0]    # convert byte array to interger
         else:
              int_temp = regs.int_temp >> 4
