@@ -7,6 +7,7 @@
 # define bit fields
 #
 import uctypes
+import struct
 REG_BIT_FIELDS = {
    "tc_temp"   : 18 << uctypes.BF_POS | 14 << uctypes.BF_LEN | uctypes.BFUINT32,
    "res1"      : 17 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
