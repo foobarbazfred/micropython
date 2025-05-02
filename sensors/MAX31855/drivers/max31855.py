@@ -84,9 +84,9 @@ class MAX31855:
         # integer part: 12 bit + floating part :2 bit
         tc_temp = regs.tc_temp
 
-        if tc_temp & 0b10_0000_0000_0000:  # if minus flag is set
-             tc_temp -= (1 << 14)          # convert to signed integer
-        tc_temp /= 4   # convert to float value
+        if tc_temp & 0b10_0000_0000_0000:  # if minus flag(MSB) is set
+             tc_temp -= (1 << 14)          # convert to negative value (int type)
+        tc_temp /= 4   # convert to float type value
 
         if self.verb:
             print("tc temp:", tc_temp)
@@ -95,9 +95,9 @@ class MAX31855:
         # convert signed # bit data  to float
         # integer part: 8 bit + floating part :4 bit
         int_temp = regs.int_temp
-        if regs.int_temp & 0b1000_0000_0000:  # if minus flag is set
-             int_temp -= (1 << 12)            # convert to signed integer
-        int_temp /= 16         # convert to float value
+        if regs.int_temp & 0b1000_0000_0000:  # if minus flag(MSB) is set
+             int_temp -= (1 << 12)            # convert to negative value (int type)
+        int_temp /= 16     # convert to float type value
 
         if self.verb:
             print("int temp:", int_temp)
