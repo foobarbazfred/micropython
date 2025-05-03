@@ -103,8 +103,7 @@ class MAX31855:
 
         return (tc_temp, int_temp, scv_flag, scg_flag, oc_flag)
 
-    #
-    # compute temperature by NIST table
+    # Apply NIST correction for Type K thermocouple
     # argument
     #    TR : temperature of remote thermocouple junction
     #    TAMB: temperature of device (cold junction)
