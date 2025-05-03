@@ -1,3 +1,6 @@
+#
+# test program for MAX31855 driver
+#
 import time
 from machine import Pin
 from machine import SPI
