@@ -3,8 +3,9 @@
 #
 # v0.01 2025/3/9 1st version
 # v0.02 2025/5/2 bug fix (8bit convert)
-# v0.03 2025/5/2 refactor; convert from bit field to signed float value
+# v0.03 2025/5/2 refactor; convert from bit field to signed float type value
 # v0.04 2025/5/2 Add new feature;  temperature_NIST (original: [Adafruit_CircuitPython_MAX31855])
+# v0.05 2025/5/3 refactor; convert from bit field to signed float type value
 #
 
 import uctypes
@@ -14,7 +15,7 @@ import math
 #
 # Bit-field definition in MAX31855 register
 #
-REG_BIT_FIELDS = {
+REGISTER_BIT_FIELDS = {
    "tc_temp"   : 18 << uctypes.BF_POS | 14 << uctypes.BF_LEN | uctypes.BFUINT32,
    "res1"      : 17 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
    "fault_bit" : 16 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
@@ -45,7 +46,8 @@ class MAX31855:
         if self.verb:
             print(register_values)
 
-        (tc_temp, int_temp, scv_flag, scg_flag, oc_flag) = self._parse_data(register_values)
+        tc_temp, int_temp, scv_flag, scg_flag, oc_flag = self._parse_data(register_values)
+
         if scv_flag == 0 and  scg_flag == 0 and oc_flag == 0:
             status = 'OK'
             temp_NIST = self._temperature_NIST(tc_temp, int_temp)
@@ -65,47 +67,44 @@ class MAX31855:
     #
     def _parse_data(self, register_values):
 
-        regs = uctypes.struct(uctypes.addressof(register_values), REG_BIT_FIELDS, uctypes.BIG_ENDIAN)
+        regs = uctypes.struct(uctypes.addressof(register_values), REGISTER_BIT_FIELDS, uctypes.BIG_ENDIAN)
 
-        scv_flag = regs.scv_bit;
-        scg_flag = regs.scg_bit;
-        oc_flag = regs.oc_bit;
+        scv_flag = regs.scv_bit
+        scg_flag = regs.scg_bit
+        oc_flag = regs.oc_bit
+        tc_temp = regs.tc_temp
+        int_temp = regs.int_temp
 
         # check flag
         if scv_flag == 0 and  scg_flag == 0 and oc_flag == 0:
-              # if OK then proceed
+              # if OK, then proceed
               pass
         else:
               # if ERROR then stop convert and return with None
               return (None, None, scv_flag, scg_flag, oc_flag)
 
         # 14-Bit Thermocouple Temperature Data
-        # convert signed # bit data  to float
         # integer part: 12 bit + floating part :2 bit
-        tc_temp = regs.tc_temp
-
+        # convert to signed and float type
         if tc_temp & 0b10_0000_0000_0000:  # if minus flag(MSB) is set
-             tc_temp -= (1 << 14)          # convert to negative value (int type)
-        tc_temp /= 4   # convert to float type value
-
+             tc_temp = ((1 << 14) - tc_temp ) * ( -1 ) # convert to signed int type
+        tc_temp = tc_temp / (2**2)  # convert to float type (1/2**2 means decimal part is 2bit)
         if self.verb:
             print("tc temp:", tc_temp)
 
         # 12-BIT INTERNAL TEMPERATURE DATA
-        # convert signed # bit data  to float
         # integer part: 8 bit + floating part :4 bit
-        int_temp = regs.int_temp
-        if regs.int_temp & 0b1000_0000_0000:  # if minus flag(MSB) is set
-             int_temp -= (1 << 12)            # convert to negative value (int type)
-        int_temp /= 16     # convert to float type value
-
+        # convert to signed and float type
+        if int_temp & 0b1000_0000_0000:  # if minus flag(MSB) is set
+             int_temp = ((1 << 12) - int_temp ) * (-1)  # convert to signed int type
+        int_temp = int_temp /(2**4)       # convert to float type (1/(2**4) means decimal part is 4bit)
         if self.verb:
             print("int temp:", int_temp)
 
         return (tc_temp, int_temp, scv_flag, scg_flag, oc_flag)
 
     #
-    # Apply NIST correction for Type K thermocouple
+    # compute temperature by NIST table
     # argument
     #    TR : temperature of remote thermocouple junction
     #    TAMB: temperature of device (cold junction)
