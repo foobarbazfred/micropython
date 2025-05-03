@@ -11,7 +11,7 @@ GP_CLK = 2  # SPI0_CLK  : GP2 [4]
 GP_MOSI = 3 # SPI0_MOSI : GP3 [5]
 GP_MISO = 4 # SPI0_MISO : GP4 [6]
 GP_CS = 5   # SPI CS    : GP5 [7]
-SPI_CLK = 5_000_000  # SPI Clock 500KHz
+SPI_CLK = 500_000  # SPI Clock 500KHz
 
 #
 # setup SPI and CS
