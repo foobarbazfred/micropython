@@ -6,6 +6,7 @@
 # v0.03 2025/5/2 refactor; convert from bit field to signed float type value
 # v0.04 2025/5/2 Add new feature;  temperature_NIST (original: [Adafruit_CircuitPython_MAX31855])
 # v0.05 2025/5/3 refactor; convert from bit field to signed float type value
+# v0.06 2025/5/3 Formatted the source code
 #
 
 import uctypes
@@ -16,14 +17,14 @@ import math
 # Bit-field definition in MAX31855 register
 #
 REGISTER_BIT_FIELDS = {
-   "tc_temp"   : 18 << uctypes.BF_POS | 14 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "res1"      : 17 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "fault_bit" : 16 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "int_temp"  :  4 << uctypes.BF_POS | 12 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "res0"      :  3 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "scv_bit"   :  2 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "scg_bit"   :  1 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
-   "oc_bit"    :  0 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'tc_temp'   : 18 << uctypes.BF_POS | 14 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'res1'      : 17 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'fault_bit' : 16 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'int_temp'  :  4 << uctypes.BF_POS | 12 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'res0'      :  3 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'scv_bit'   :  2 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'scg_bit'   :  1 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
+   'oc_bit'    :  0 << uctypes.BF_POS |  1 << uctypes.BF_LEN | uctypes.BFUINT32,
 }
 
 class MAX31855:
@@ -52,13 +53,13 @@ class MAX31855:
             status = 'OK'
             temp_NIST = self._temperature_NIST(tc_temp, int_temp)
         else:
-            status = "ERROR"
+            status = 'ERROR'
             if scv_flag == 1:
-                   status += ",SVC"
+                   status += ',SVC'
             if scg_flag == 1:
-                   status += ",SCG"
+                   status += ',SCG'
             if oc_flag == 1:
-                   status +=",OC"
+                   status +=',OC'
         return (tc_temp, int_temp, temp_NIST, status)
     
 
@@ -90,7 +91,7 @@ class MAX31855:
              tc_temp = ((1 << 14) - tc_temp ) * ( -1 ) # convert to signed int type
         tc_temp = tc_temp / (2**2)  # convert to float type (1/2**2 means decimal part is 2bit)
         if self.verb:
-            print("tc temp:", tc_temp)
+            print('tc temp:', tc_temp)
 
         # 12-BIT INTERNAL TEMPERATURE DATA
         # integer part: 8 bit + floating part :4 bit
@@ -99,11 +100,12 @@ class MAX31855:
              int_temp = ((1 << 12) - int_temp ) * (-1)  # convert to signed int type
         int_temp = int_temp /(2**4)       # convert to float type (1/(2**4) means decimal part is 4bit)
         if self.verb:
-            print("int temp:", int_temp)
+            print('int temp:', int_temp)
 
         return (tc_temp, int_temp, scv_flag, scg_flag, oc_flag)
 
-    # Apply NIST correction for Type K thermocouple
+    #
+    # compute temperature by NIST table
     # argument
     #    TR : temperature of remote thermocouple junction
     #    TAMB: temperature of device (cold junction)
@@ -111,11 +113,11 @@ class MAX31855:
     # (https://github.com/adafruit/Adafruit_CircuitPython_MAX31855/blob/main/adafruit_max31855.py)
     #
     def _temperature_NIST(self, TR, TAMB):
-        """
+        '''
         Thermocouple temperature in degrees Celsius, computed using
         raw voltages and NIST approximation for Type K, see:
         https://srdata.nist.gov/its90/download/type_k.tab
-        """
+        '''
         # thermocouple voltage based on MAX31855's uV/degC for type K (table 1)
         VOUT = 0.041276 * (TR - TAMB)
         # cold junction equivalent thermocouple voltage
@@ -188,7 +190,7 @@ class MAX31855:
                 -3.110810e-08,
             )
         else:
-            raise RuntimeError(f"Total thermoelectric voltage out of range:{VTOTAL}")
+            raise RuntimeError(f'Total thermoelectric voltage out of range:{VTOTAL}')
         # compute temperature
         TEMPERATURE = 0
         for n, c in enumerate(DCOEF):
