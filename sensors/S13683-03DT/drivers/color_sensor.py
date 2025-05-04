@@ -8,6 +8,8 @@
 #  v0.06 (2025/4/6)     Feature Update; add color name, check facing target or not
 #  v0.07 (2025/4/7)     Feature Update; check target is persistence or not
 #                       bug fix:  wait time is not *3 but *4 (r,g,b,brightness)
+#  v0.08 (2025/5/4)     change connect pins
+#                       bug fix: median filter (not orderd)
 
 import time
 from machine import Pin
@@ -44,8 +46,10 @@ INTEGRATION_TIME_SL_SHORT = 0b01    #  01:1.4ms
 INTEGRATION_TIME_SHORT = 0b00       #  00:87.5us
 
 # default whilte balance (max value when white paper is set)
-WHITE_BALANCE = {'r': 6221, 'g': 7484, 'b': 6792, }
-                #{'r': 5725, 'g': 6345, 'b': 5894, }
+WHITE_BALANCE = {'r': 8025, 'b': 8598, 'g': 9049}
+#{'g': 8846, 'b': 8268, 'r': 7769}
+#{'r': 6221, 'g': 7484, 'b': 6792, }
+#{'r': 5725, 'g': 6345, 'b': 5894, }
 
 #LED_PIN : 0
 #WB_SW : 1
@@ -115,18 +119,22 @@ def update_white_balance(i2c):
     WHITE_BALANCE['b'] = center_value[2]
 
 
+#
+# find center value of sample data
+# (sort by adjust value, and get center value )
+#
 def median_filter(samples):
     key_value_list = {}
     for sample in samples:
-       key = sample[3]
+       key = sample[3]          # 3: adjust value in sampling data (r,g,b,adjust)
        key_value_list[key] = sample
 
     center_idx = int(len(key_value_list)/2)
-    key_of_center_value = list(key_value_list.keys())[center_idx]
+    key_of_center_value = sort(list(key_value_list.keys()))[center_idx]
     return key_value_list[key_of_center_value]
 
 
-def sensor_start(i2c ,np):
+def sensor_start(i2c, np):
 
     global wb_mode
     global is_target_presence
@@ -152,10 +160,11 @@ def sensor_start(i2c ,np):
         norm_g = raw_g / WHITE_BALANCE['g']
         norm_b = raw_b / WHITE_BALANCE['b']
         print(f'norm: R: {norm_r}, G: {norm_g}, B: {norm_b}')
+        print(f'norm: R: {int(norm_r*255)}, G: {int(norm_g*255)}, B: {int(norm_b*255)}')
         (hue, sat, brt) = rgb2hsb(norm_r, norm_g, norm_b)
         print(f"Hue: {hue}, Sat: {sat}, Brt: {brt}")
 
-        if brt < OPEN_BLIGHTNESS  and (not is_reflection(adjust)):   # if open (blightness of open)
+        if brt < OPEN_BLIGHTNESS  and (not is_reflection(i2c, adjust)):   # if open (blightness of open)
               print('not facing')
               is_target_presence = False
               return
@@ -171,7 +180,7 @@ def sensor_start(i2c ,np):
 # check reflection
 #
 REFLECT_THRESHOLD = 10
-def is_reflection(prev_adjust):
+def is_reflection(i2c, prev_adjust):
     np_light_on(np, brightness=10)      # set dimmer
     #time.sleep_ms(int(179.2 * 4 ))     # wait 179.2 * 4
     #time.sleep_ms(int(22.4 * 4 + 100))       # wait 22.4 * 4
@@ -299,7 +308,7 @@ def wb_sw_handler(args):
 #
 np = None
 wb_sw = None
-i2c = None
+i2c0 = None
 
 is_target_presence = False
 
@@ -307,7 +316,7 @@ def main():
 
     global np
     global wb_sw
-    global i2c
+    global i2c0
     global is_target_presence
 
     # setup for white balance sw
@@ -319,18 +328,17 @@ def main():
     np = neopixel_init(pin)
     np_light_on(np)
 
-    i2c = I2C(1, scl=Pin(19), sda=Pin(18), freq=10_000) # OK??
-    init_sensor(i2c)
-    setup_sensor(i2c)
+    i2c0 = I2C(0, scl=Pin(5), sda=Pin(4), freq=100_000)   # 100K
+    init_sensor(i2c0)
+    setup_sensor(i2c0)
 
     while True:
         if is_target_presence:
-             sensor_start(i2c,np)
+             sensor_start(i2c0,np)
         else:
-             is_target_presence = check_target_presence()
+             is_target_presence = check_target_presence(i2c0)
              if not is_target_presence:
                 print('Please place the object you want to examine')
-
 
 
 def np_light_red(np, brightness=20):
@@ -355,7 +363,7 @@ def np_light_green(np, brightness=20):
 
 THRESHOLD_COLOR_DIFF = 50
 
-def check_target_presence():
+def check_target_presence(i2c):
     while True:
        # turn on green
        np_light_green(np, brightness=2)
@@ -387,3 +395,4 @@ main()
 
 #
 # end of file
+#
