@@ -81,8 +81,7 @@ def calc_pulse_rate(hr_sensor, led):
        filterd_data = filterd_data * -1   #  reverse  wave form
 
        # check cross the threshold
-       if filterd_data > VALID_DIFFERENCE_THRESHOLD and prev_filterd_data <= VALID_DIFFERENCE_THRESHOLD  :
-
+       if filterd_data > VALID_DIFFERENCE_THRESHOLD and prev_filterd_data <= VALID_DIFFERENCE_THRESHOLD:
            # Prevent false detections by ensuring the value is valid.
            min_val = min(ir_buffer100)
            if  min_val > MEASUREMENT_VALIDATION_THRESHOLD:   
@@ -125,24 +124,17 @@ def main():
 
     # feed back led
     led = PWM(Pin(15), freq=500, duty_u16 = 0)
-    
-    #freq= 399_361
-    
-    i2c = I2C(0, scl=Pin(5),sda=Pin(4),freq=100_000)  # 100KHz
-    #hex(i2c.scan()[0])
-    
-    if DEV_ADDR in i2c.scan():
+
+    # setup Heart Rate Sensor
+    i2c0 = I2C(0, scl=Pin(5), sda=Pin(4), freq=100_000)  # 100KHz   
+    if DEV_ADDR in i2c0.scan():
         print('connection ok')
     else:
         print('check device connection')
     
-    hr_sensor = MAX30100(i2c)
+    hr_sensor = MAX30100(i2c0)
     hr_sensor.setup()
     
-    #'0x57'
-    #i2c.readfrom_mem(DEV_ADDR,0,1)
-    #hr_sensor.read_temperature()
-
     #
     #  calcurate plus rate
     #
