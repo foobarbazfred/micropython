@@ -25,6 +25,8 @@ DEV_ADDR = 0x57
 FIFO_SIZE = 16
 FIFO_DEPTH = 16
 
+import time
+
 class MAX30100:
 
     def __init__(self, i2c, dev_addr = DEV_ADDR):   # , dev_addr = DEV_ADDR): work-around
