@@ -8,8 +8,9 @@
 #  V0.03 (2025/5/6) refactor; define constants
 #  V0.04 (2025/5/8) refine algorithm
 #                   not invert graph
-#  V0.04 (2025/5/8) refine algorithm
+#  V0.05 (2025/5/8) refine algorithm
 #                   change window size 10 -> 5 and change THRESHOLD
+#  V0.06 (2025/5/8) refactor; rename variables 
 #                  
 #
 
@@ -74,6 +75,8 @@ def calc_pulse_rate(hr_sensor, led):
        ir_buffer100.pop(0)
        ir_buffer100.append(ir)
 
+       #print(ir)
+
        # append moving average filter to diffential(N=10)
        prev_filterd_data = filterd_data
        filterd_data = int(sum(moving_average)/len(moving_average))
@@ -123,15 +126,16 @@ def main():
 
     # feed back led
     led = PWM(Pin(15), freq=500, duty_u16 = 0)
-        
-    i2c = I2C(0, scl=Pin(5),sda=Pin(4),freq=100_000)  # 100KHz
     
-    if DEV_ADDR in i2c.scan():
+    # setup MAX30100
+    i2c0 = I2C(0, scl=Pin(5),sda=Pin(4),freq=100_000)  # 100KHz
+    
+    if DEV_ADDR in i2c0.scan():
         print('connection ok')
     else:
-        print('check device connection')
+        print('Error! check device connection')
     
-    hr_sensor = MAX30100(i2c)
+    hr_sensor = MAX30100(i2c0)
     hr_sensor.setup()
     
     #
