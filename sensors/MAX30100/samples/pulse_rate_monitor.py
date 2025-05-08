@@ -67,7 +67,8 @@ def calc_pulse_rate(hr_sensor, led):
        diff = ir - prev_ir
        prev_ir = ir
        n_of_samples += 1
-
+       if n_of_samples > 100_000:
+           n_of_samples = 0
        # add new data to queue (difference)
        moving_ave_buffer.pop(0)
        moving_ave_buffer.append(diff)
@@ -100,9 +101,9 @@ def calc_pulse_rate(hr_sensor, led):
                 prev_tick = current_tick
 
        #
-       # feed back by LED brink
+       # Notify proper finger placement with LED blinking
        #
-       if (n_of_samples % 2) == 0:   # down sampling 50 -> 25
+       if (n_of_samples % 2) == 0:   # Reduce processing by half  50times/sec -> 25times/sec
            max_val = max(ir_raw_buffer)
            mean_val = int(sum(ir_raw_buffer)/len(ir_raw_buffer))
            min_val = min(ir_raw_buffer)
