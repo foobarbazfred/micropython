@@ -11,6 +11,7 @@
 #  V0.05 (2025/5/8) refine algorithm
 #                   change window size 10 -> 5 and change THRESHOLD
 #  V0.06 (2025/5/8) refactor; rename variables 
+#  V0.07 (2025/5/8) refactor; rename variables 
 #                  
 #
 
@@ -45,9 +46,9 @@ def calc_pulse_rate(hr_sensor, led):
    hr_sensor.clear_ovfl_data()
    prev_ir = 0
    n_of_samples=0
-   moving_average = [0] * 5
-   ir_buffer100 = [0] * 100
-   filterd_data = 0
+   moving_ave_buffer= [0] * 5
+   ir_raw_buffer = [0] * 100
+   filtered_data = 0
    prev_tick = time.ticks_us()
 
    while True:
@@ -67,44 +68,44 @@ def calc_pulse_rate(hr_sensor, led):
        prev_ir = ir
        n_of_samples += 1
 
-       # add new data to queue (diffential)
-       moving_average.pop(0)
-       moving_average.append(diff)
+       # add new data to queue (difference)
+       moving_ave_buffer.pop(0)
+       moving_ave_buffer.append(diff)
 
        # add new data to queue (raw data)
-       ir_buffer100.pop(0)
-       ir_buffer100.append(ir)
+       ir_raw_buffer.pop(0)
+       ir_raw_buffer.append(ir)
 
        #print(ir)
 
-       # append moving average filter to diffential(N=10)
-       prev_filterd_data = filterd_data
-       filterd_data = int(sum(moving_average)/len(moving_average))
+       # apply moving averate filter and get filtered data
+       prev_filtered_data = filtered_data
+       filtered_data = int(sum(moving_ave_buffer)/len(moving_ave_buffer))
 
        # check cross the threshold
-       if filterd_data < VALID_DIFFERENCE_THRESHOLD and prev_filterd_data >= VALID_DIFFERENCE_THRESHOLD  :
+       if filtered_data < VALID_DIFFERENCE_THRESHOLD and prev_filtered_data >= VALID_DIFFERENCE_THRESHOLD:
 
            # Prevent false detections by ensuring the value is valid.
-           min_val = min(ir_buffer100)
+           min_val = min(ir_raw_buffer)
            if  min_val > MEASUREMENT_VALIDATION_THRESHOLD:   
-                # if measured data is over THRESHOLD, then collect sampling
-                print('-------HHHHRRRR-----------', end='') 
+                # Calculate PBM using valid data
+                #print('-----------', end='') 
                 current_tick = time.ticks_us()
                 delta = time.ticks_diff(current_tick, prev_tick)
                 pbm = int(60 * 1000 * 1000 / delta)
                 if pbm >= 50 and pbm <= 220:   # display only if collect values.
-                     print(pbm, int(delta/1000))
+                     print(f'heart rate: {pbm} PBM, period: {int(delta/1000)} ms')
                 else:                          # not display if abnormal values
-                     print('xxx', int(delta/1000))
+                     print(f'heart rate: xxx, period: {int(delta/1000)} ms')
                 prev_tick = current_tick
 
        #
        # feed back by LED brink
        #
        if (n_of_samples % 2) == 0:   # down sampling 50 -> 25
-           max_val = max(ir_buffer100)
-           mean_val = int(sum(ir_buffer100)/len(ir_buffer100))
-           min_val = min(ir_buffer100)
+           max_val = max(ir_raw_buffer)
+           mean_val = int(sum(ir_raw_buffer)/len(ir_raw_buffer))
+           min_val = min(ir_raw_buffer)
            if min_val > MEASUREMENT_VALIDATION_THRESHOLD:   
                # blink LED only if in collect measuring
                brightness = int(0xffff * (max_val - ir) / (max_val - min_val))
