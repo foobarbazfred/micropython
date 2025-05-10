@@ -88,7 +88,7 @@ class MAX31855:
         # integer part: 12 bit + floating part :2 bit
         # convert to signed and float type
         if tc_temp & 0b10_0000_0000_0000:  # if minus flag(MSB) is set
-             tc_temp = ((1 << 14) - tc_temp ) * ( -1 ) # convert to signed int type
+             tc_temp = tc_temp - (1 << 14)   # convert to signed int type
         tc_temp = tc_temp / (2**2)  # convert to float type (1/2**2 means decimal part is 2bit)
         if self.verb:
             print('tc temp:', tc_temp)
