@@ -25,11 +25,11 @@ MQTT_TOPIC = "v1/devices/me/telemetry"
 
 CLIENT_ID = 'set_your_client_id'
 USER_NAME = 'set_your_user_name'
-PASSWD = 'set_your_password'
+PASSWORD = 'set_your_password'
 
 def connect():
     print('Connect to ThingsBoard by MQTT')
-    client = MQTTClient(CLIENT_ID, MQTT_BROKER, MQTT_PORT, USER_NAME, PASSWD)
+    client = MQTTClient(CLIENT_ID, MQTT_BROKER, MQTT_PORT, USER_NAME, PASSWORD)
     client.connect()
     return client
 
