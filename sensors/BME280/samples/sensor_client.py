@@ -22,12 +22,10 @@ from machine import I2C
 MQTT_BROKER = "192.168.10.100"  # ThingsBoard Server running on Raspberry Pi
 MQTT_PORT = 1883
 MQTT_TOPIC = "v1/devices/me/telemetry"
-MQTT_CREDENTIALS = {'clientID' : "rpi_pico_w2_001", 'userName' :"pico_w2_001", 'password' : "hello!pico!001!"}
 
-
-CLIENT_ID = MQTT_CREDENTIALS['clientID']
-USER_NAME = MQTT_CREDENTIALS['userName']
-PASSWD = MQTT_CREDENTIALS['password']
+CLIENT_ID = 'set_your_client_id'
+USER_NAME = 'set_your_user_name'
+PASSWD = 'set_your_password'
 
 def connect():
     print('Connect to ThingsBoard by MQTT')
@@ -53,8 +51,7 @@ def setup_sensor(i2c):
 def main():
 
     # setup I2C for connect BME280
-    # I2C(0, freq=399361, scl=5, sda=4, timeout=50000)
-    i2c=I2C(0)
+    i2c = I2C(0, scl=5, sda=4, freq=10_000)
     bme280 = setup_sensor(i2c)
 
     #connect IoT PF by MQTT
