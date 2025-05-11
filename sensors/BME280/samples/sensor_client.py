@@ -18,10 +18,10 @@ from umqtt.simple import MQTTClient
 from bme280_float import BME280
 from machine import I2C
 
-
 MQTT_BROKER = "192.168.10.100"  # ThingsBoard Server running on Raspberry Pi
 MQTT_PORT = 1883
 MQTT_TOPIC = "v1/devices/me/telemetry"
+
 
 CLIENT_ID = 'set_your_client_id'
 USER_NAME = 'set_your_user_name'
@@ -66,6 +66,10 @@ def main():
             temp, raw_pressure, humidity = bme280.read_compensated_data()
             pressure = raw_pressure / 100
             message  = {'bme280.temp' : temp, 'bme280.pressure' : pressure, 'bme280.humidity' : humidity}
-            print(f'send message {message} on topic: {TOPIC}')
-            client.publish(TOPIC, json.dumps(message), qos=0)
+            print(f'send message {message} on topic: {MQTT_TOPIC}')
+            client.publish(MQTT_TOPIC, json.dumps(message), qos=0)
             time.sleep(30)
+
+#
+# start with main()
+#
