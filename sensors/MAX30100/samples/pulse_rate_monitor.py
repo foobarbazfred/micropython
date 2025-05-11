@@ -13,6 +13,7 @@
 #  V0.06 (2025/5/8) refactor; rename variables 
 #  V0.07 (2025/5/8) refactor; rename variables 
 #  V0.08 (2025/5/10) Added new feature; LCD support.
+#  V0.09 (2025/5/10) Modification: Reversed the LED brightness routine from 0-1 to 1-0.
 #                  
 #
 
@@ -98,7 +99,7 @@ def calc_pulse_rate(hr_sensor, led, lcd):
             mean_val = int(sum(ir_raw_buffer)/len(ir_raw_buffer))
             if min_val > MEASUREMENT_VALIDATION_THRESHOLD:   
                 # blink LED only if in collect measuring
-                brightness = int(0xffff * (max_val - ir) / (max_val - min_val))
+                brightness = int(0xffff * (1.0 - (max_val - ir) / (max_val - min_val)))
             else:
                 # if error, then turn off LED
                 brightness = 0
