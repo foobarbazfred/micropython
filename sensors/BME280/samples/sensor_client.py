@@ -5,11 +5,21 @@
 # IoT Platform:  ThingsBoard connect with MQTT
 #
 
+
+# required MQTT Library
+# https://github.com/micropython/micropython-lib/tree/master/micropython/umqtt.simple
+# file: https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.simple/umqtt/simple.py
+# you can install by mip
+# import mip
+# mip.install('umqtt.simple')
+
 # required BME280 driver 
 # by Robert Hammelrath
 # https://github.com/robert-hh/BME280
 # file:  https://github.com/robert-hh/BME280/blob/master/bme280_float.py
-#
+# you can install by mip
+# import mip
+# mip.install('https://raw.githubusercontent.com/robert-hh/BME280/refs/heads/master/bme280_float.py')
 
 import time
 import json
