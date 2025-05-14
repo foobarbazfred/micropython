@@ -81,5 +81,10 @@ def main():
             time.sleep(30)
 
 #
-# start with main()
+# start
+#
+main()
+
+#
+# end of file
 #
