@@ -7,6 +7,12 @@ from umqtt.simple import MQTTClient
 from max31855 import MAX31855
 
 #
+# K-type thermocouple parts id
+#
+PART_ID1 = 'NR-39Y-Y'        # https://akizukidenshi.com/catalog/g/g117400/
+PART_ID2 = 'NR-39B'          # https://akizukidenshi.com/catalog/g/g110750/
+
+#
 # defs for misquitto broker connection
 #
 SERVER = "test.mosquitto.org"
@@ -50,7 +56,7 @@ max31855 = MAX31855(spi, cs)
 while True:
     tc_temp, int_temp, temp_NIST, status = max31855.get_temperature()
     if status == 'OK':
-        msg = json.dumps({'temperature' : tc_temp})
+        msg = json.dumps({'temperature' : tc_temp, 'part_id' : PART_ID1})
         (yy, mm, dd, hh, mm, ss, x, y ) = time.localtime()
         print('publish:', msg, f"at {hh+9}:{mm}:{ss}")
         client.publish(MQTT_TOPIC, msg)
