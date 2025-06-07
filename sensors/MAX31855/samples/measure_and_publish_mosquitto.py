@@ -1,3 +1,9 @@
+#
+# A sample code that measures temperature using 
+# a K-type thermocouple probe and publishes it to a 
+# mosquitto.org broker using the MQTT protocol.
+#
+
 import time
 import ntptime
 import json
@@ -21,7 +27,7 @@ CLIENT_ID="RPi_1234"
 MQTT_TOPIC = 'rpi_pico2w/thermopile/'
 
 #
-# defs for MAX31855
+# defs for MAX31855 connection
 #
 SPI_CH = 0  # SPI0
 GP_CLK = 2  # SPI0_CLK  : GP2 [4]
