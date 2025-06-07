@@ -2,7 +2,9 @@
 
 
 
-python sample code (subscribe sample for )
+python sample code (subscribe sample for measure_and_publish_mosquitto.py)
+https://github.com/foobarbazfred/micropython/blob/main/sensors/MAX31855/samples/measure_and_publish_mosquitto.py
+
 ```
 #!/usr/bin/python3
 
