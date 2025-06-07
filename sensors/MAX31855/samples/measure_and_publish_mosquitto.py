@@ -9,11 +9,10 @@ from max31855 import MAX31855
 #
 # defs for misquitto broker connection
 #
-SERVER="test.mosquitto.org"
-PORT=1883
-USERID="RPI_1234"
+SERVER = "test.mosquitto.org"
+PORT = 1883
 CLIENT_ID="RPi_1234"
-MQTT_TOPIC = 'rpi_pico2w/termopile/'
+MQTT_TOPIC = 'rpi_pico2w/thermopile/'
 
 #
 # defs for MAX31855
@@ -31,7 +30,7 @@ SPI_CLK = 5_000_000  # SPI Clock 500KHz
 # setup MQTT
 #
 ntptime.settime()
-client = MQTTClient(CLIENT_ID, SERVER, PORT, USERID, '')
+client = MQTTClient(CLIENT_ID, SERVER, PORT)
 client.connect()
 
 #
