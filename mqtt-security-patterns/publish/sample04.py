@@ -1,6 +1,11 @@
 #
+# sample04.py
 #
+# MQTT over TLS with mutual authentication (mTLS) sample.
+# Connects to test.mosquitto.org using client certificate authentication,
+# publishes a test message, then disconnects.
 #
+
 from umqtt.simple import MQTTClient
 import ssl
 import json
