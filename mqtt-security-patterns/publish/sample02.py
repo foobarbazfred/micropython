@@ -1,6 +1,12 @@
-# sample 02
+#
+# sample02.py
 # with TLS and no auth
 #
+# MQTT over TLS with no authentication sample.
+# Connects to test.mosquitto.org over TLS,
+# publishes a test message, then disconnects.
+#
+
 from umqtt.simple import MQTTClient
 import json
 
