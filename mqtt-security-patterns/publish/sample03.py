@@ -1,6 +1,12 @@
-# sample 02
+#
+# sample03.py
 # with TLS and  auth by ID/PWD
 #
+# MQTT over TLS with authentication (ID/PWD) sample.
+# Connects to test.mosquitto.org using client certificate authentication,
+# publishes a test message, then disconnects.
+#
+
 from umqtt.simple import MQTTClient
 import json
 
