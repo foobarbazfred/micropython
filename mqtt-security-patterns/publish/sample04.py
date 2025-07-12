@@ -29,7 +29,7 @@ ssl_params = {
 }
 client = MQTTClient( MQTT_CLIENT_ID, MQTT_BROKER, MQTT_PORT, ssl = True, ssl_params = ssl_params )
 client.connect()
-message = {'nth_publish': count , 'client_id': MQTT_CLIENT_ID }
+message = {'client_id': MQTT_CLIENT_ID, 'security settings' : 'with TLS and auth by client crt' }
 payload = json.dumps(message).encode('utf-8')
 print("publish:", payload)
 client.publish(MQTT_TOPIC, payload)
