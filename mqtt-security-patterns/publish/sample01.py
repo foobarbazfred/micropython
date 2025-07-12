@@ -11,7 +11,7 @@ MQTT_CLIENT_ID = "client_RP_Pico2W_0001"
 
 client = MQTTClient(MQTT_CLIENT_ID, MQTT_BROKER, port=MQTT_PORT, ssl=False)
 client.connect()
-message = {'nth_publish': count , 'client_id': MQTT_CLIENT_ID }
+message = {'client_id': MQTT_CLIENT_ID , 'security settings' : 'no TLS and no Auth'}
 payload = json.dumps(message).encode('utf-8')
 print("publish:", payload)
 client.publish(MQTT_TOPIC, payload)
