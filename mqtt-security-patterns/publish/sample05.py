@@ -24,11 +24,10 @@ ssl_params = {
     'server_hostname' : MQTT_BROKER,
 }
 client = MQTTClient(MQTT_CLIENT_ID, MQTT_BROKER, MQTT_PORT,
-user = MQTT_USER, password = MQTT_PASSWORD,
+                     user = MQTT_USER, password = MQTT_PASSWORD,
                      ssl = True,  ssl_params = ssl_params )
 client.connect()
-message = {'client_id': MQTT_CLIENT_ID, 
-'connect by' : ' MQTT over TLS, with auth by client CRT'}
+message = {'client_id': MQTT_CLIENT_ID , 'security settings' : 'with TLS and Auth by ID/PWD'}
 payload = json.dumps(message).encode('utf-8')
 client.publish(MQTT_TOPIC, payload)
 client.disconnect()
