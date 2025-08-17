@@ -45,3 +45,8 @@ import sample02  # Example: Publish with TLS (PEM)
 ## Note on Certificate File Format
 
 In the ESP32 version of MicroPython’s mqtt.simple, PEM‑formatted certificates are supported. However, in the RP2040/RP2350 version of MicroPython’s mqtt.simple (v1.6.0), the certificate must be in DER format.
+
+to convert, following commands
+```
+$  openssl x509 -inform PEM -in <input pem file> -outform DER -out  <output der file>
+```
