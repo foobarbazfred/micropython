@@ -38,3 +38,10 @@ Designed for boards like the ESP32-S3, the samples cover scenarios from plain MQ
 3. Run from REPL or `main.py`:
 ```python
 import sample02  # Example: Publish with TLS (PEM)
+```
+
+---
+
+## Note on Certificate File Format
+
+In the ESP32 version of MicroPython’s mqtt.simple, PEM‑formatted certificates are supported. However, in the RP2040/RP2350 version of MicroPython’s mqtt.simple (v1.6.0), the certificate must be in DER format.
