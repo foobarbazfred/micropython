@@ -1,6 +1,9 @@
 #
 # sample05.py
 #
+# to test this program, you needs mosquitto ROOT CA (der format)
+# it can be get in https://test.mosquitto.org/
+#
 from umqtt.simple import MQTTClient
 import ssl
 import json
