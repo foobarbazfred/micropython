@@ -98,3 +98,7 @@ List of shortcuts:
 python3 -m mpremote connect port:${TTY}  fs cp ${FILE} :/lib/${FILE}
 
 ```
+マニュアル
+https://docs.micropython.org/en/latest/reference/mpremote.html#mpremote-command-fs
+https://micropython-docs-ja.readthedocs.io/ja/latest/reference/mpremote.html#mpremote-command-fs
+
