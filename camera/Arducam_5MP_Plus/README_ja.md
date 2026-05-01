@@ -19,7 +19,7 @@ Arducam Shield Miniの外観<br>
 ### カメラとの接続
 マイコンとカメラとの接続はSPIとI2Cの両方を使います。撮影時の画素やフォーマット等、カメラ制御はI2Cで行います。撮影された画像データはフレームバッファに格納されます。マイコンへの画像データ転送はSPIで行います。
 
-<img src='assets/schematics_arducam_ov5760.png' width=800>
+<img src='assets/schematics_arducam_ov5760.png' width=600>
 
 ### Arducam (OV5642 5MPixel)の制御
 Arducamは　OV5652によるセンサ部と、フレームバッファ部で構成されます。OV5642の制御はI2Cで行い、フレームバッファの制御はSPIで行います。画質や画像サイズの設定、ホワイトバランスの設定等、撮影に関する設定はすべてOV5642に対して行います。どのようなレジスタ構成になっているか？はArducamの仕様書には掲載されておらず、OV5642の仕様書を参照する必要があります。非常に多くのレジスタが存在しており、間違った値を設定すると正しく撮影できない問題が発生します。このため、仕様書を調べながら個々の設定を決定するのではなく、サンプルコードをそのまま流用しています(MicroPytyon用Arducamドライバが存在するかもしれません。今回はOV5642を理解するため自分でドライバを作りたいと思い、MicroPython版ドライバの有無を調べていません)。<br>
@@ -76,7 +76,11 @@ ardu.read_pixels(buf)
 ドライバを作り込めば可能です（サンプルコードを読み解いて、どのレジスタに設定すればよいかが分かれば追加開発可能です）
 非圧縮の画像であるため、MicroPythonでエッジ検出や二値化への変換に利用できます。
 
-撮影した画像をグラフィックディスプレイに表示するコードは以下です。（ソースが長くなるのでグラフィックディスプレイの初期化は省略しています）。グラフィックディスプレイを含めたデモソースは以下に置いています。[arducam_lcd_demo.py](src/arducam_lcd_demo.py)
+### Arducam (OV5642 5MPixel)で撮影した画像をLCDに表示する
+撮影した画像をグラフィックディスプレイに表示するコードは以下です。（ソースが長くなるのでグラフィックディスプレイの初期化は省略しています）。グラフィックディスプレイを含めたデモソースは以下に置いています。
+デモで使ったLCDは、1.8-inch TFT LCD screen (128x160）です。コントローラとして、ST7735 が使われています。
+
+[arducam_lcd_demo.py](src/arducam_lcd_demo.py)
 ```
 from machine import Pin
 from machine import I2C
@@ -116,7 +120,9 @@ while True:
    show_image()
 ```
 RP2350(150MHz)の環境で、撮影->描画の処理に900msかかります。撮影性能としては、1fps程度です。
+RP2350とグラフィックディスプレイの接続は以下の回路図を参照してください。
 
+<img src="assets/schematic_SPI_graphic_LCD.png"  width="600">
 
 ### ドキュメント類
 - https://docs.arducam.com/Arduino-SPI-camera/Legacy-SPI-camera/Camera-Models/
