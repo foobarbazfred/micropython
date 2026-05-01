@@ -126,7 +126,7 @@ while True:
    show_image()
 ```
 
-In an RP2350 (150MHz) environment, the capture-to-display process takes 900ms. The capture performance is approximately 1 fps.
+In an RP2350 (150MHz) environment, the capture-to-display process takes 230ms. The capture performance is approximately 4 fps.
 
 For the RP2350 and graphic display connection, please refer to the following schematic:
 
