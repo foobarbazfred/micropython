@@ -58,7 +58,7 @@ ov5642i2c = I2C(scl=Pin(5), sda=Pin(4), freq=9600)
 CAM_PIN_CS = 1
 fifo_cs = Pin(CAM_PIN_CS, Pin.OUT)
 
-SPI0_BAUDRATE=10_00_000
+SPI0_BAUDRATE = 7_000_000   # Datasheet max: 8 MHz (running at half speed for stability)
 SPI0_MOSI = 3
 SPI0_MISO = 0
 SPI0_SCK = 2
@@ -97,7 +97,7 @@ ov5642i2c = I2C(scl=Pin(5), sda=Pin(4), freq=9600)
 CAM_PIN_CS = 1
 fifo_cs = Pin(CAM_PIN_CS, Pin.OUT)
 
-SPI0_BAUDRATE=10_00_000
+SPI0_BAUDRATE = 7_000_000   # Datasheet max: 8 MHz (running at half speed for stability)
 SPI0_MOSI = 3
 SPI0_MISO = 0
 SPI0_SCK = 2
