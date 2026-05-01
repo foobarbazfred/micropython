@@ -77,10 +77,10 @@ ardu.read_pixels(buf)
 非圧縮の画像であるため、MicroPythonでエッジ検出や二値化への変換に利用できます。
 
 ### Arducam (OV5642 5MPixel)で撮影した画像をLCDに表示する
-撮影した画像をグラフィックディスプレイに表示するコードは以下です。（ソースが長くなるのでグラフィックディスプレイの初期化は省略しています）。グラフィックディスプレイを含めたデモソースは以下に置いています。
-デモで使ったLCDは、1.8-inch TFT LCD screen (128x160）です。コントローラとして、ST7735 が使われています。
+撮影した画像をグラフィックディスプレイに表示するコードは以下です。（ソースが長くなるのでグラフィックディスプレイの初期化は省略しています）。デモで使ったLCDは、1.8-inch TFT LCD screen (128x160）です。コントローラとして、ST7735 が使われています。
+グラフィックディスプレイを含めたデモソースは以下に置いています。<br>
+[ov5642_lcd_demo.py](test/ov5642_lcd_demo.py)
 
-[arducam_lcd_demo.py](src/arducam_lcd_demo.py)
 ```
 from machine import Pin
 from machine import I2C
@@ -122,7 +122,7 @@ while True:
 RP2350(150MHz)の環境で、撮影->描画の処理に900msかかります。撮影性能としては、1fps程度です。
 RP2350とグラフィックディスプレイの接続は以下の回路図を参照してください。
 
-<img src="assets/schematic_SPI_graphic_LCD.png"  width="600">
+<img src="assets/schematic_SPI_graphic_LCD.png"  width="700">
 
 ### ドキュメント類
 - https://docs.arducam.com/Arduino-SPI-camera/Legacy-SPI-camera/Camera-Models/
