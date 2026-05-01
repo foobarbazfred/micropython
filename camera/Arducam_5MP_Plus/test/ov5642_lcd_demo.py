@@ -2,6 +2,7 @@
 # Arducam and LCD Demo
 # file: arducam_lcd_demo.py
 # v0.0.2 (2026/04/30)
+# v0.0.3 (2026/05/01)
 
 
 #
@@ -77,7 +78,7 @@ ov5642i2c = I2C(scl=Pin(5), sda=Pin(4), freq=9600)
 CAM_PIN_CS = 1
 fifo_cs = Pin(CAM_PIN_CS, Pin.OUT)
 
-SPI0_BAUDRATE=10_00_000
+SPI0_BAUDRATE = 7_000_000   # Datasheet max: 8 MHz (running at half speed for stability)
 SPI0_MOSI = 3
 SPI0_MISO = 0
 SPI0_SCK = 2
@@ -85,9 +86,9 @@ fifo_spi = SPI(0,SPI0_BAUDRATE,sck=Pin(SPI0_SCK), mosi=Pin(SPI0_MOSI), miso=Pin(
 
 ardu = OV5642(ov5642i2c, fifo_spi, fifo_cs)
 
-SCREEN_WIDTH=160
-SCREEN_HEIGHT=128
-BYTEPERPIX=2  # RGB565
+SCREEN_WIDTH = 160
+SCREEN_HEIGHT = 128
+BYTEPERPIX = 2  # RGB565
 
 #
 #  take picture by Arducam and display on LCD
@@ -120,7 +121,6 @@ camera_demo()
 #
 #
 #
-
 
 
 
