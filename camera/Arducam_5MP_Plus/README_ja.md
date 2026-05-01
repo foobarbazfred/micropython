@@ -19,6 +19,8 @@ Arducam Shield Miniの外観<br>
 ### カメラとの接続
 マイコンとカメラとの接続はSPIとI2Cの両方を使います。撮影時の画素やフォーマット等、カメラ制御はI2Cで行います。撮影された画像データはフレームバッファに格納されます。マイコンへの画像データ転送はSPIで行います。
 
+<img src='assets/schematics_arducam_ov5760.png' width=800>
+
 ### Arducam (OV5642 5MPixel)の制御
 Arducamは　OV5652によるセンサ部と、フレームバッファ部で構成されます。OV5642の制御はI2Cで行い、フレームバッファの制御はSPIで行います。画質や画像サイズの設定、ホワイトバランスの設定等、撮影に関する設定はすべてOV5642に対して行います。どのようなレジスタ構成になっているか？はArducamの仕様書には掲載されておらず、OV5642の仕様書を参照する必要があります。非常に多くのレジスタが存在しており、間違った値を設定すると正しく撮影できない問題が発生します。このため、仕様書を調べながら個々の設定を決定するのではなく、サンプルコードをそのまま流用しています(MicroPytyon用Arducamドライバが存在するかもしれません。今回はOV5642を理解するため自分でドライバを作りたいと思い、MicroPython版ドライバの有無を調べていません)。<br>
 画像データはOV5642から取得せず、一旦フレームバッファに格納されます。フレームバッファが搭載されているおかげで、撮影速度とデータ取得速度が一致してなくても画像データの取りこぼしが発生せず、欠損のない画像が取得できます。OV5642からフレームバッファへの取り込み指示は、フレームバッファ用レジスタにフラグを立てることで指示します。具体的には、FIFO control Register(0x04番地)のBit[1]に１を設定することでフレームバッファへの画像取り込みが行われます。
@@ -64,7 +66,7 @@ BYTEPERPIX=2  # RGB565
 
 import gc
 gc.collect()
-buf = bytearray(SCREEN_WIDTH * SCREEN_HEIGHT * 2)
+buf = bytearray(SCREEN_WIDTH * SCREEN_HEIGHT * BYTEPERPIX)
 
 ardu.fifo.clear_done_flag()       
 ardu.fifo.start_capture_and_wait()
@@ -101,7 +103,7 @@ tft.rotate(1)   # rotate screen 90 degrees
 
 import gc
 gc.collect()
-buf = bytearray(SCREEN_WIDTH * SCREEN_HEIGHT * 2)
+buf = bytearray(SCREEN_WIDTH * SCREEN_HEIGHT * BYTEPERPIX)
 def show_image():
     global buf
     ardu.read_pixels(buf)
