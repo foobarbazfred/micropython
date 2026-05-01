@@ -119,7 +119,7 @@ while True:
    ardu.fifo.start_capture_and_wait()
    show_image()
 ```
-RP2350(150MHz)の環境で、撮影->描画の処理に230msかかります。撮影性能としては、5fps程度です。
+RP2350(150MHz)の環境で、撮影->描画の処理に230msかかります。撮影性能としては、4fps程度です。
 RP2350とグラフィックディスプレイの接続は以下の回路図を参照してください。
 
 <img src="assets/schematic_SPI_graphic_LCD.png"  width="700">
