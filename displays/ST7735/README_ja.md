@@ -150,29 +150,69 @@ tft.text(pos_x + 10, pos_y + 10, 'World!!', terminalfont, COLOR_WHITE, size=1)
 上記プログラムは　TFTライブラリが提供する描画関数を使ってグラフィック表示を行っていました。MicroPythonではグラフィック表示のためのフレームバッファを操作するモジュールが提供されています。フレームバッファ用モジュール(framebuf)を使うと、framebufが提供する描画関数を使ってフレームバッファ内(bytearrayで確保したメモリ領域)に描画データを設定できます。
 フレームバッファ内の描画が完了した後、TFTライブラリのimage関数を呼び出して、一度に描画させることが可能です。
 framebufモジュールではフォントも内蔵しており、上記説明したフォントデータのimportも不要です。以下のソースコードは初期化が終わったグラフィックディスプレイ(変数tft)に対して、framebufモジュールでグラフィックやテキストを描画するサンプルです
+
 ```
-# 
-# create frame buffer by library framebuf
 #
-
-W = 128   # max Width of LCD
-H = 160   # max Height of LCD
-X , Y = (0, 0)
-
+# draw text
+#
+import time
+from machine import Pin
+from machine import SPI
 import framebuf
+
+from st7735r import ST7735R
+import terminalfont
+
+TFT_SPI_BAUD=800_0000   #800Kbps
+TFT_SPI_MOSI=11
+TFT_SPI_MISO=8
+TFT_SPI_SCK=10
+
+mosi  = Pin(TFT_SPI_MOSI, Pin.OUT)
+miso  = Pin(TFT_SPI_MISO, Pin.OUT)
+sck  = Pin(TFT_SPI_SCK, Pin.OUT)
+
+TFT_DC=12
+TFT_CS=13
+TFT_RST=14
+
+rst  = Pin(TFT_RST, Pin.OUT)
+cs  = Pin(TFT_CS, Pin.OUT)
+dc  = Pin(TFT_DC, Pin.OUT)
+
+TFT_WIDTH=128
+TFT_HEIGHT=160
+
+spi = SPI(1, baudrate=TFT_SPI_BAUD, polarity=1, phase=1, mosi=mosi, miso=miso, sck=sck )	# blue and green tab work
+tft = ST7735R(spi, dc, cs, rst, w=TFT_WIDTH, h=TFT_HEIGHT, x=0, y=0, rot=0, inv=False, bgr=False)
+tft.init()
+tft.fill(tft.COLOR_BLACK)
+
+#
+#
+# byte swapped
+COLOR_WHITE = 0xFFFF
+COLOR_BLACK = 0x0000
+COLOR_RED   = 0x00F8
+COLOR_GREEN = 0xE007
+COLOR_BLUE  = 0x1F00
+
+W = 100   # max Width of LCD
+H = 30   # max Height of LCD
+(POS_X , POS_Y) = (10, 50)
 
 # create frame buffer for RGB565 pixel and 30x30
 b_ary = bytearray(W * H * 2)
 fbuf = framebuf.FrameBuffer(b_ary, W, H, framebuf.RGB565)
 
-fbuf.fill(0)
-fbuf.text('MicroPython!', 8, int(H/2), 0xffff)
-fbuf.hline(0, int(H/2) - 4, W, 0xf0_00) # x.y.w.c
-fbuf.hline(0, int(H/2) + 8 + 2, W, 0xf0_00) # x.y.w.c
-fbuf.rect(0,0,W,H,0x00ff)
+fbuf.fill(COLOR_GREEN)
+fbuf.text('MicroPython!', 8, int(H/3), COLOR_WHITE)
+fbuf.hline(0, int(H/4) , W, COLOR_RED)     # x.y.w.c
+fbuf.hline(0, int(H/4*3) , W, COLOR_RED) # x.y.w.c
+fbuf.rect(0, 0, W, H, COLOR_BLUE)
 
-tft.fill(tft.BLACK)
-tft.image(X, Y, X+W-1, Y+H-1, b_ary)
+tft._set_window(POS_X, POS_Y, POS_X + W - 1, POS_Y + H - 1)
+tft.data(b_ary)
 ```
 いろいろ便利に使えるframebufですが、実際の利用に際して注意が必要です。framebufモジュールでは、グラフィック表示させたい領域分のメモリをbytearray関数を使ってヒープ領域に確保する必要があります。（下記サンプルのb_ary = bytearray(W * H * 2)の処理）。表示領域が大きくなるにつれ、MicroPythonのピープが減少する問題になるため、framebufモジュールを使うかどうかは、描画したいグラフィックの画素数とヒープメモリの残量を考えて判断する必要があります。bytearrayによるバッファ確保時、Width * Height * 2　という演算式で領域確保を行っています。*2 と２倍している理由は、1画素あたり2byte使うためです。１画素のカラー表示が、　RGB565と呼ばれる、１画素16bitで表現するためです。1画素あたり何bit使うか？は液晶ディスプレイの設定により決まります。
 
