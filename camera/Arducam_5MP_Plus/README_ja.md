@@ -53,7 +53,7 @@ ov5642i2c = I2C(scl=Pin(5), sda=Pin(4), freq=9600)
 CAM_PIN_CS = 1
 fifo_cs = Pin(CAM_PIN_CS, Pin.OUT)
 
-SPI0_BAUDRATE=10_00_000
+SPI0_BAUDRATE = 7_000_000   # Datasheet max: 8 MHz (running at half speed for stability)
 SPI0_MOSI = 3
 SPI0_MISO = 0
 SPI0_SCK = 2
@@ -91,7 +91,7 @@ ov5642i2c = I2C(scl=Pin(5), sda=Pin(4), freq=9600)
 CAM_PIN_CS = 1
 fifo_cs = Pin(CAM_PIN_CS, Pin.OUT)
 
-SPI0_BAUDRATE=10_00_000
+SPI0_BAUDRATE = 7_000_000   # Datasheet max: 8 MHz (running at half speed for stability)
 SPI0_MOSI = 3
 SPI0_MISO = 0
 SPI0_SCK = 2
@@ -119,7 +119,7 @@ while True:
    ardu.fifo.start_capture_and_wait()
    show_image()
 ```
-RP2350(150MHz)の環境で、撮影->描画の処理に900msかかります。撮影性能としては、1fps程度です。
+RP2350(150MHz)の環境で、撮影->描画の処理に230msかかります。撮影性能としては、4fps程度です。
 RP2350とグラフィックディスプレイの接続は以下の回路図を参照してください。
 
 <img src="assets/schematic_SPI_graphic_LCD.png"  width="700">
