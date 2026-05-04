@@ -5,20 +5,17 @@
 本章ではディプレイコントローラ：ST7735を使ったグラフィックディスプレイを取り上げます。ST7735はSPIで制御します。
 
 ### ST7735用ドライバとフォント
-ST7735用ドライバとして、boochow氏が公開されているドライバを使います。（他の方もST7735用にいろいろ公開されていますが、boochow氏作のドライバが安定して動作するので選んでいます。）
+ST7735用ドライバとして、Mike Causer氏が公開されているドライバを使います。（他の方もST7735用にいろいろ公開されていますが）
 ソースは以下に置かれています<br>
-https://github.com/boochow/MicroPython-ST7735/tree/master<br>
+https://github.com/mcauser/micropython-st7735
 mipモジュールのinstall機能を使ってドライバをインストールできます。
 ```
 import mip
-mip.install('https://raw.githubusercontent.com/boochow/MicroPython-ST7735/refs/heads/master/ST7735.py')
+mip.install('https://raw.githubusercontent.com/mcauser/micropython-st7735/refs/heads/master/st7735r.py')
 ```
-上記操作で、Raspberry Pi Pico 2 WのFlashメモリの/lib配下にST7735.pyがインストールされます。<br>
-上記ドライバは、ST7735を制御して直線や曲線等のグラフィック描画が可能になります。もしグラフィックディプレイに文字を出す場合は、フォントデータが必要になります。フォントデータはかつてGuyGarver氏のリポジトリ(下記)から入手できていましたが、現在はPublicはリポジトリはすべて閉鎖されたようです。<br>
-https://github.com/GuyCarver/MicroPython/tree/master/lib<br>
-GuyGarver氏のソースをベースにした新しいterminalfont.pyがmcauser氏によって公開されておりこれを使うことでテキスト描画が可能です<br>
-https://github.com/mcauser/micropython-st7735/tree/master<br>
-フォントデータは以下でインストールできます
+上記操作で、Raspberry Pi Pico 2 WのFlashメモリの/lib配下にst7735r.pyがインストールされます。<br>
+上記ドライバは、ST7735を制御して直線や曲線等のグラフィック描画が可能になります。もしグラフィックディプレイに文字を出す場合は、フォントデータが必要になります。フォントデータはかつてGuyGarver氏のリポジトリから入手できていましたが、現在はPublicはリポジトリはすべて閉鎖されたようです。<br>
+GuyGarver氏のソースをベースにした新しいterminalfont.pyがMike Causer氏によって公開されておりこのフォントを使うことでテキスト描画が可能です。フォントデータは以下でインストールできます
 ```
 import mip
 mip.install('https://raw.githubusercontent.com/mcauser/micropython-st7735/refs/heads/master/terminalfont.py')
@@ -38,108 +35,113 @@ RP2とディスプレイはSPIで接続します。必要な結線は、SPI_SCK,
 上記のGP番号の割り当てはご都合に合わせて変更可能です。
 簡単なテストプログラムを示します。画面の塗りつぶしと斜線を表示します。
 ```
-#
-# test program for ST7735
-#
-
-# GP8  SPI1 Rx
-# GP9  SPI1 CSn
-# GP10 SPI1 SCK
-# GP11 SPI1 TX
-# GP12 A0 
-# GP13 CS
-# GP14 RESET
-
-
-from ST7735 import TFT
-#from sysfont import sysfont
-from machine import SPI
-from machine import Pin
 import time
+from machine import Pin
+from machine import SPI
+from st7735r import ST7735R
 
-PIN_ADC=12
-PIN_CS=13
-PIN_RESET=14
+TFT_SPI_BAUD=800_0000   #800Kbps
+TFT_SPI_MOSI=11
+TFT_SPI_MISO=8
+TFT_SPI_SCK=10
 
-SPI1_BAUD=12_000_000
-PIN_SPI1_SCK=10
-PIN_SPI1_TX=11
-PIN_SPI1_RX=8
+mosi  = Pin(TFT_SPI_MOSI, Pin.OUT)
+miso  = Pin(TFT_SPI_MISO, Pin.OUT)
+sck  = Pin(TFT_SPI_SCK, Pin.OUT)
 
-spi = SPI(1, baudrate=SPI1_BAUD, sck=Pin(PIN_SPI1_SCK), mosi=Pin(PIN_SPI1_TX), miso=Pin(PIN_SPI1_RX))
-tft=TFT(spi, PIN_ADC, PIN_RESET, PIN_CS)
+TFT_DC=12
+TFT_CS=13
+TFT_RST=14
+
+rst  = Pin(TFT_RST, Pin.OUT)
+cs  = Pin(TFT_CS, Pin.OUT)
+dc  = Pin(TFT_DC, Pin.OUT)
+
+TFT_WIDTH=128
+TFT_HEIGHT=160
+
+COLOR_BLACK = 0x0000
+COLOR_WHITE = 0xFFFF
+COLOR_RED = 0xF800
+COLOR_GREEN = 0x07E0
+COLOR_BLUE = 0x001F
+COLOR_CYAN = 0x07FF
+COLOR_MAGENTA = 0xF81F
 
 
-#
-#
-#
-tft.initr()
-tft.rgb(True)
+cyan = 0x07FF
+magenta = 0xF81F
+yellow = 0xFFE0
 
-#
-# fill test
-#
-for _ in range(5):
-    for color in (TFT.WHITE, TFT.BLUE, TFT.FOREST, TFT.RED, TFT.BLACK):
-        tft.fill(color)
-        time.sleep(0.5)
+spi = SPI(1, baudrate=TFT_SPI_BAUD, polarity=1, phase=1, mosi=mosi, miso=miso, sck=sck )	# blue and green tab work
+tft = ST7735R(spi, dc, cs, rst, w=TFT_WIDTH, h=TFT_HEIGHT, x=0, y=0, rot=0, inv=False, bgr=False)
+tft.init()
+tft.fill(COLOR_BLACK)
 
-#
-# draw lines
-#
-WIDTH,HEIGHT=tft.size()
-tft.line((0,0),(WIDTH,HEIGHT),TFT.WHITE)
-tft.line((WIDTH,0),(0,HEIGHT),TFT.WHITE)
+#tft.fill(COLOR_WHITE)
 
-#
-# clear screen
-#
-time.sleep(5)
-tft.fill(TFT.BLACK)
+
+for _ in range(3):
+    for color in (COLOR_RED, COLOR_GREEN, COLOR_BLUE):
+          tft.fill(color)
+          time.sleep(1)
+
+tft.fill(COLOR_BLACK)
+tft.rect_outline(0, 0, TFT_WIDTH, TFT_HEIGHT, COLOR_BLUE)
+tft.line(0, 0, TFT_WIDTH, TFT_HEIGHT, COLOR_RED)
+tft.line(TFT_WIDTH, 0, 0, TFT_HEIGHT, COLOR_GREEN)
+
+
+if TFT_WIDTH < TFT_HEIGHT:
+   radius = int(TFT_WIDTH/2)
+else:
+   radius = int(TFT_HEIGHT/2)
+tft.circle_outline(int(TFT_WIDTH/2),int(TFT_HEIGHT/2),radius,COLOR_CYAN)
+tft.line(10, 10, int(TFT_WIDTH/2), int(TFT_HEIGHT/2), COLOR_RED)
 ```
 フォントデータをインストールすることで、テキストの描画が可能になります。以下はテキスト(Hello, World!)の描画サンプルです。
 ```
 #
-# test program for ST7735
+# draw text
 #
-
-# GP8  SPI1 Rx
-# GP9  SPI1 CSn
-# GP10 SPI1 SCK
-# GP11 SPI1 TX
-# GP12 A0 
-# GP13 CS
-# GP14 RESET
-
-from ST7735 import TFT
-from terminalfont import terminalfont
-from machine import SPI
-from machine import Pin
 import time
+from machine import Pin
+from machine import SPI
+from st7735r import ST7735R
+import terminalfont
 
-PIN_ADC=12
-PIN_CS=13
-PIN_RESET=14
+TFT_SPI_BAUD=800_0000   #800Kbps
+TFT_SPI_MOSI=11
+TFT_SPI_MISO=8
+TFT_SPI_SCK=10
 
-SPI1_BAUD=12_000_000
-PIN_SPI1_SCK=10
-PIN_SPI1_TX=11
-PIN_SPI1_RX=8
+mosi  = Pin(TFT_SPI_MOSI, Pin.OUT)
+miso  = Pin(TFT_SPI_MISO, Pin.OUT)
+sck  = Pin(TFT_SPI_SCK, Pin.OUT)
 
-spi = SPI(1, baudrate=SPI1_BAUD, sck=Pin(PIN_SPI1_SCK), mosi=Pin(PIN_SPI1_TX), miso=Pin(PIN_SPI1_RX))
-tft=TFT(spi, PIN_ADC, PIN_RESET, PIN_CS)
+TFT_DC=12
+TFT_CS=13
+TFT_RST=14
 
-#
-#
-#
-tft.initr()
-tft.rgb(True)
-tft.fill(TFT.BLACK)
-    
-WIDTH,HEIGHT=tft.size()
-tft.text((int(WIDTH/6), int(HEIGHT/2)), "Hello, World!", TFT.WHITE, terminalfont, 1, nowrap=True)
+rst  = Pin(TFT_RST, Pin.OUT)
+cs  = Pin(TFT_CS, Pin.OUT)
+dc  = Pin(TFT_DC, Pin.OUT)
 
-#
+TFT_WIDTH=128
+TFT_HEIGHT=160
+
+COLOR_BLACK = 0x0000
+COLOR_WHITE = 0xFFFF
+
+spi = SPI(1, baudrate=TFT_SPI_BAUD, polarity=1, phase=1, mosi=mosi, miso=miso, sck=sck )	# blue and green tab work
+tft = ST7735R(spi, dc, cs, rst, w=TFT_WIDTH, h=TFT_HEIGHT, x=0, y=0, rot=0, inv=False, bgr=False)
+tft.init()
+tft.fill(COLOR_BLACK)
+
+(pos_x, pos_y) = ( int(TFT_WIDTH/4), int(TFT_HEIGHT/5))
+tft.text(pos_x, pos_y, 'Hello,', terminalfont, COLOR_WHITE, size=1)
+tft.text(pos_x + 10, pos_y + 10, 'World!!', terminalfont, COLOR_WHITE, size=1)
+
 #
 #
 ```
