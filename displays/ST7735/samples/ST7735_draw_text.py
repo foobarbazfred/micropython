@@ -30,17 +30,14 @@ dc  = Pin(TFT_DC, Pin.OUT)
 TFT_WIDTH=128
 TFT_HEIGHT=160
 
-COLOR_BLACK = 0x0000
-COLOR_WHITE = 0xFFFF
-
 spi = SPI(1, baudrate=TFT_SPI_BAUD, polarity=1, phase=1, mosi=mosi, miso=miso, sck=sck )	# blue and green tab work
 tft = ST7735R(spi, dc, cs, rst, w=TFT_WIDTH, h=TFT_HEIGHT, x=0, y=0, rot=0, inv=False, bgr=False)
 tft.init()
-tft.fill(COLOR_BLACK)
+tft.fill(tft.COLOR_BLACK)
 
 (pos_x, pos_y) = ( int(TFT_WIDTH/4), int(TFT_HEIGHT/5))
-tft.text(pos_x, pos_y, 'Hello,', terminalfont, COLOR_WHITE, size=1)
-tft.text(pos_x + 10, pos_y + 10, 'World!!', terminalfont, COLOR_WHITE, size=1)
+tft.text(pos_x, pos_y, 'Hello,', terminalfont, tft.COLOR_WHITE, size=1)
+tft.text(pos_x + 10, pos_y + 10, 'World!!', terminalfont, tft.COLOR_WHITE, size=1)
 
 #
 #
