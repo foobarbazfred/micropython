@@ -33,8 +33,13 @@ RP2とディスプレイはSPIで接続します。必要な結線は、SPI_SCK,
 |SPI_1 TX| 11|SPI Ch1 MOSI|
 |SPI_1 RX| 8|SPI Ch1 MISO|
 
-上記のGP番号の割り当てはご都合に合わせて変更可能です。
-簡単なテストプログラムを示します。画面の塗りつぶしと斜線を表示します。
+上記のGP番号の割り当てはご都合に合わせて変更可能です。回線図を以下に示します。<br>
+<img src="assets/Schematics_SPI_Graphic_LCD.png" width=800>
+
+簡単なテストプログラムを示します。画面の塗りつぶしと斜線を表示します。<br>
+動作例(Hello World!を描画する場合は２番目のサンプルコードを使ってください)<br>
+<img src="assets/IMG_g_display.png" width=200>
+
 ```
 import time
 from machine import Pin
