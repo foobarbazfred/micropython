@@ -8,6 +8,7 @@
 ST7735用ドライバとして、Mike Causer氏が公開されているドライバを使います。（他の方もST7735用にいろいろ公開されていますが）
 ソースは以下に置かれています<br>
 https://github.com/mcauser/micropython-st7735
+
 mipモジュールのinstall機能を使ってドライバをインストールできます。
 ```
 import mip
