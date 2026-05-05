@@ -37,8 +37,7 @@ RP2とディスプレイはSPIで接続します。必要な結線は、SPI_SCK,
 <img src="assets/Schematics_SPI_Graphic_LCD.png" width=800>
 
 簡単なテストプログラムを示します。画面の塗りつぶしと斜線を表示します。<br>
-動作例(Hello World!を描画する場合は２番目のサンプルコードを使ってください)<br>
-<img src="assets/IMG_g_display.png" width=200>
+<img src="assets/LCD_test_draw_lines.png" width=300>
 
 ```
 import time
@@ -102,7 +101,8 @@ tft.line(10, 10, int(TFT_WIDTH/2), int(TFT_HEIGHT/2), tft.COLOR_RED)
 #
 #
 ```
-フォントデータをインストールすることで、テキストの描画が可能になります。以下はテキスト(Hello, World!)の描画サンプルです。
+フォントデータをインストールすることで、テキストの描画が可能になります。以下はテキスト(Hello, World!)の描画サンプルです。<br>
+<img src="assets/LCD_test_draw_text.png" width=300>
 ```
 #
 # draw text
@@ -150,6 +150,8 @@ tft.text(pos_x + 10, pos_y + 10, 'World!!', terminalfont, tft.COLOR_WHITE, size=
 上記プログラムは　TFTライブラリが提供する描画関数を使ってグラフィック表示を行っていました。MicroPythonではグラフィック表示のためのフレームバッファを操作するモジュールが提供されています。フレームバッファ用モジュール(framebuf)を使うと、framebufが提供する描画関数を使ってフレームバッファ内(bytearrayで確保したメモリ領域)に描画データを設定できます。
 フレームバッファ内の描画が完了した後、TFTライブラリのimage関数を呼び出して、一度に描画させることが可能です。
 framebufモジュールではフォントも内蔵しており、上記説明したフォントデータのimportも不要です。以下のソースコードは初期化が終わったグラフィックディスプレイ(変数tft)に対して、framebufモジュールでグラフィックやテキストを描画するサンプルです
+<br>
+<img src="assets/LCD_test_draw_by_frame.png" width=300>
 
 ```
 #
