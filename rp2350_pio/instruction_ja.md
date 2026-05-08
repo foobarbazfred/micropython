@@ -16,6 +16,9 @@
 - **PIO アセンブリ言語命令**  
   https://micropython-docs-ja.readthedocs.io/ja/latest/library/rp2.html#pio-assembly-language-instructions
 
+- **PIO サンプルコード(公式) **  
+  https://github.com/raspberrypi/pico-micropython-examples/tree/master/pio
+
 `asm_pio` のソースコードや関連資料をもとに仕様を整理したものです。
 
 ---
