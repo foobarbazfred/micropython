@@ -13,6 +13,9 @@
 - **PIO アセンブラ (`asm_pio`)**  
   https://micropython-docs-ja.readthedocs.io/ja/latest/library/rp2.html?highlight=pio_asm#pio-related-functions
 
+- **PIO アセンブリ言語命令**  
+  https://micropython-docs-ja.readthedocs.io/ja/latest/library/rp2.html#pio-assembly-language-instructions
+
 `asm_pio` のソースコードや関連資料をもとに仕様を整理したものです。
 
 ---
