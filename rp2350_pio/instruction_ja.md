@@ -148,11 +148,12 @@ out(exec, 32)
 ---
 
 ## `push([iffull], [block|noblock])`
-ISR → RX FIFO（32bit）。
+ISR → RX FIFO（32bit）
+ISRの値をRX FIFOにpushする。push後ISRをクリアする。
 
-- `iffull`: ISR が満杯でない場合は push しない  
+- `iffull`: ISR が満杯(FULL)でない場合は push しない  
 - `block`: FIFO が空くまで待つ  
-- `noblock`: 空いていなくてもスキップ  
+- `noblock`: 空いていなくてもスキップ  （メモ：スキップとは？）
 
 ---
 
