@@ -24,11 +24,12 @@ https://github.com/raspberrypi/pico-micropython-examples/tree/master/pio
 asm_pio のソースコードや関連資料をもとに仕様を整理したものです。
 
 ### PIO概説
+PIOのダイアグラムを以下に示します。ステートマシンを中心に、FIFO、GPIO、＃＃＃で構成されます。<br>
 <img src='assets/Diagram_single_PIO_block.png' width=600>
 
-StateMachineを構成する機能ブロック
+StateMachineを構成する機能ブロック<br>
 <img src='assets/state_machine_overview.png' width=600>
-PIOプログラミングを行う上で、上記機能ブロックに対して操作します
+PIOプログラミングを行う上で、上記機能ブロックに対して操作します。
 
-Pinへのデータ出力、Pinからのデータ入力の観点でデータフローを整理
+Pinへのデータ出力、Pinからのデータ入力の観点でデータフローを整理<br>
 <img src='assets/output_input_flow.png' width=600>
