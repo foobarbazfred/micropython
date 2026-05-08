@@ -16,7 +16,7 @@ def blink_w_sideset():
 # to enable 2KHz to StateMachine, set systemclock to 125MHz
 machine.freq(125_000_000)
 
-sm = rp2.StateMachine(STATE_MACHINE_ID, blink_w_sideset, freq=2000, side_base=Pin(GP_SIDESET_PIN))
+sm = rp2.StateMachine(STATE_MACHINE_ID, blink_w_sideset, freq=2000, sideset_base=Pin(GP_SIDESET_PIN))
 
 sm.active(1)
 time.sleep(5)
