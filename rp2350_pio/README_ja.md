@@ -24,7 +24,7 @@ https://github.com/raspberrypi/pico-micropython-examples/tree/master/pio
 asm_pio のソースコードや関連資料をもとに仕様を整理したものです。
 
 ### PIO概説
-PIOのダイアグラムを以下に示します。ステートマシンを中心に、FIFO、GPIO、＃＃＃で構成されます。<br>
+PIOのダイアグラムを以下に示します。ステートマシンを中心に、命令語記憶部(Instruction Memory)、FIFOで構成されます。外部との入出力のためGPIOと接続されています。<br>
 <img src='assets/Diagram_single_PIO_block.png' width=600>
 
 StateMachineを構成する機能ブロック<br>
