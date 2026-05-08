@@ -7,8 +7,10 @@ STATE_MACHINE_ID=0
 
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
 def blink_w_set():
+    # wrap_target()    #  may skip
     set(pins, 1)
     set(pins, 0)
+    # wrap()           # may skip
 
 sm = rp2.StateMachine(STATE_MACHINE_ID, blink_w_set, freq=2000, set_base=Pin(GP_SET_PIN))
 
