@@ -6,8 +6,12 @@ from machine import Pin
 GP_IN_PIN = 0
 STATE_MACHINE_ID = 0
 
-def pio_handler(pio_sm):
-    print('IRQ from SM:', pio_sm)
+def pio_handler(intr_sm):
+    print('IRQ from SM:', intr_sm)
+    if intr_sm == sm0:
+        print('IRQ_SM0 is set')
+    else:
+        print('IRQ_SM0 is not set')    
 
 @rp2.asm_pio()            
 def sw_w_wait_irq():
@@ -20,9 +24,9 @@ def sw_w_wait_irq():
 # to enable 2KHz to StateMachine, set systemclock to 125MHz
 machine.freq(125_000_000)
 sw_pin = Pin(GP_IN_PIN, mode=Pin.IN, pull=Pin.PULL_UP)
-sm = rp2.StateMachine(STATE_MACHINE_ID, sw_w_wait_irq, freq=2000, in_base=sw_pin)
-sm.irq(handler=pio_handler)
+sm0 = rp2.StateMachine(STATE_MACHINE_ID, sw_w_wait_irq, freq=2000, in_base=sw_pin)
+sm0.irq(handler=pio_handler)
 
-sm.active(1)
+sm0.active(1)
 time.sleep(10)
-sm.active(0)
+sm0.active(0)
