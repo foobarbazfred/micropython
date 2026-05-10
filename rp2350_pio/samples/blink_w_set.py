@@ -3,14 +3,14 @@ import rp2
 import machine
 from machine import Pin
 
-GP_SET_PIN=1
-STATE_MACHINE_ID=0
+GP_SET_PIN = 1
+STATE_MACHINE_ID = 0
 
 @rp2.asm_pio(set_init=rp2.PIO.OUT_LOW)
 def blink_w_set():
-    # wrap_target()    #  may skip
-    set(pins, 1)
-    set(pins, 0)
+    # wrap_target()    # may skip
+    set(pins, 1)       # set 1 to GPIO
+    set(pins, 0)       # set 0 to GPIO
     # wrap()           # may skip
 
 
