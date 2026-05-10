@@ -6,8 +6,8 @@ from machine import Pin
 GP_IN_PIN = 0
 STATE_MACHINE_ID = 0
 
-def pio_handler(sm):
-    print('IRQ from SM:', sm)
+def pio_handler(pio_sm):
+    print('IRQ from SM:', pio_sm)
 
 @rp2.asm_pio()            
 def sw_w_wait_irq():
