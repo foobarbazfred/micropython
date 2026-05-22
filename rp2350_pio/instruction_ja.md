@@ -174,6 +174,11 @@ TX FIFO → OSR（32bit）。
 - コピー元はsrc, コピー先はdstで指定する
 - コピー実行時、32bit幅固定
 
+指定可能なdest,src
+|dest|src|
+|--|--|
+|pins,x,y,exec,pc,isr,osr|pins, x, y, null, status, isr, osr|
+
 特殊操作：
 
 - `invert(src)`
@@ -193,7 +198,7 @@ mov(pc, x)
 IRQ フラグの設定/クリア。
 
 - `flag`: 0〜7  
-- `rel(flag)`: ステートマシン番号に相対指定  
+- `rel(flag)`: ステートマシン番号を反映した相対指定  
 - `clear`: フラグクリア  
 - `block`: クリアされるまで待つ  
 
@@ -203,6 +208,7 @@ IRQ フラグの設定/クリア。
 irq(2)
 irq(rel(3))
 ```
+SM0でirq(rel(3))とすると、絶対化（3+0)でirq(3)相当のIRQ,SM1でirq(rel(3))とすると絶対化(3+1)で、irq(4)相当のIRQが発生される。
 
 ---
 
