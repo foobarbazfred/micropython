@@ -238,6 +238,11 @@ irq(rel(3))
 set(pins, 2)
 ```
 
+#### 命令セット
+<img width="1164" height="627" alt="image" src="https://github.com/user-attachments/assets/a4f2587d-3029-4428-a6eb-5a38b8ffd41e" />
+
+
+
 ---
 
 # 参考資料
