@@ -191,6 +191,13 @@ mov(pins, x)
 mov(exec, x)
 mov(pc, x)
 ```
+srcとして、mov(xxx,status)のようにstatusを指定する場合、どのstatusを参照するのか指定が必要(多分、未テスト)
+```
+@rp2.asm_pio(
+    mov_status_sel=2,  # 0=TX FIFO, 1=RX FIFO, 2=IRQ (RP2350新機能)
+    mov_status_n=2     # STATUS_Nの設定。ここではIRQの「2番」を指定
+)
+```
 
 ---
 
