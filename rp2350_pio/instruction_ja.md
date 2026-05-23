@@ -221,6 +221,7 @@ irq(2)
 irq(rel(3))
 ```
 SM0でirq(rel(3))とすると、絶対化（3+0)でirq(3)相当のIRQ,SM1でirq(rel(3))とすると絶対化(3+1)で、irq(4)相当のIRQが発生される。
+MicroPythonにIRQを送りたい場合、指定できるIRQ番号は0から3まで。4以上を指定してもCPU側からは見えないためMicroPythonでは受け取れない。なお、(rel(n))と書くとmod4(SM_number + n)の計算がなされるので、rel(5)等と書いてもmod4で0-3に再計算されるのでMicroPythonにIRQが届く。
 
 ---
 
