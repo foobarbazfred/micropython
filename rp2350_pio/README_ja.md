@@ -21,6 +21,9 @@ https://micropython-docs-ja.readthedocs.io/ja/latest/library/rp2.html#pio-assemb
 PIO サンプルコード(公式)
 https://github.com/raspberrypi/pico-micropython-examples/tree/master/pio
 
+RP2350 仕様概要
+https://www.raspberrypi.com/documentation/microcontrollers/microcontroller-chips.html#rp2350
+
 asm_pio のソースコードや関連資料をもとに仕様を整理したものです。
 
 ### PIO概説
