@@ -30,6 +30,9 @@ https://pip.raspberrypi.com/documents/RP-008373-DS
 asm_pio のソースコードや関連資料をもとに仕様を整理したものです。
 
 ### PIO概説
+RP2350のシステム図を以下に示します。他の周辺IOと同様にPIOはGPIOとマイクロコントローラの間に置かれており、外部のセンサや各種デバイスとの通信に使われることが分かります。<br>
+<img src='assets/rp2350_system_overview_w_pio_marked.png' width=600>
+
 PIOのダイアグラムを以下に示します。ステートマシンを中心に、命令語記憶部(Instruction Memory)、FIFOで構成されます。外部との入出力のためGPIOと接続されています。<br>
 <img src='assets/Diagram_single_PIO_block.png' width=600>
 
