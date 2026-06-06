@@ -24,6 +24,9 @@ https://github.com/raspberrypi/pico-micropython-examples/tree/master/pio
 RP2350 仕様概要
 https://www.raspberrypi.com/documentation/microcontrollers/microcontroller-chips.html#rp2350
 
+RP2350 Data Sheet
+https://pip.raspberrypi.com/documents/RP-008373-DS
+
 asm_pio のソースコードや関連資料をもとに仕様を整理したものです。
 
 ### PIO概説
