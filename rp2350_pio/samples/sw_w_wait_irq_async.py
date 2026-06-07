@@ -20,8 +20,6 @@ instance_sm0 = None
 irq_flag = asyncio.ThreadSafeFlag()
 irq_sm_instance = None
 
-
-
 #
 # IRQ handler for PIO state machine.
 # Stores the triggering SM instance and sets the thread-safe flag.
@@ -31,8 +29,6 @@ def pio_irq_handler(intr_sm):
     global irq_sm_instance
     irq_sm_instance = intr_sm
     irq_flag.set()
-
-
 
 #
 # Asyncio task that waits for the IRQ flag and processes the event
