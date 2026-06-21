@@ -159,18 +159,18 @@ out(exec, 32)
 ISR → RX FIFO（32bit）
 ISRの値をRX FIFOにpushする。push後ISRをクリアする。
 
-- `iffull`: ISR が満杯(FULL)でない場合は push しない  
-- `block`: FIFO が空くまで待つ  
-- `noblock`: 空いていなくてもスキップ  （メモ：スキップとは？）
+- `iffull`: ISRのシフトカウンタが閾値に到達していない場合 push しない  
+- `block`: FIFO が空くまで待つ （ストール、実行停止） 
+- `noblock`: FIFOが空いていない場合、pushせずISRをクリアする(データロスト)
 
 ---
 
 ## `pull([ifempty], [block|noblock])`
-TX FIFO → OSR（32bit）。
+TX FIFO → OSR（32bit） TX FIFOからpopして値を取り出し、OSRに書き込む。
 
-- `ifempty`: OSR が満杯でない場合は pull しない  
-- `block`: FIFO に値が入るまで待つ  
-- `noblock`: 空読みして OSR=0  
+- `ifempty`: OSRのシフトカウンタが閾値に達していない場合 pull しない  
+- `block`: FIFO に値が入るまで待つ　（ストール、実行停止）
+- `noblock`: 空のFIFOを読み込んで OSRがクリアされる（0に設定される）  
 
 ---
 
