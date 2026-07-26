@@ -173,9 +173,6 @@ def write_CLK_HSTX_DIV(val):
     
 
 
-
-
-
 # >>> hex(read_CLK_HSTX_DIV())
 # '0x10000'
 # >>> 160 * 1000 / 65536
@@ -188,29 +185,4 @@ def read_RESETS_RESET():
     base = BASE_CLOCKS
     offset = OFFSET_RESETS_RESET
     return read_reg(base, offset)
-
-
-
-
-
-#>>> hex(read_CLK_HSTX_CTRL())
-#'0x10_00_08_00'
-# '0b  0001_0000_0000_0000_0000_1000_0000_0000
-# ENABLE:1 , ENABLED:1
-
-
-###
-#
-
-# >>> hex(read_CLK_HSTX_DIV())
-# '0x10000'   65536 
-# clock : 2KHz ???
-
-
-#address of 0x40028000 (defined as IO_BANK0_BASE in SDK).
-# 0x09c GPIO19_CTRL
-
-
-# GPIO19_CTRL
-#hex(read_reg(0x40028000,0x9c))
 
