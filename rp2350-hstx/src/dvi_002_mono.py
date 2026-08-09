@@ -128,7 +128,7 @@ RAW_SHIFT = 0       # 0 means 32
 RAW_N_SHIFTS = 1
 
 # encoded expand
-# each 16bit (RGB:565) and 2times
+# each 1bit (monoral) and 32 times(register setting 0)
 #
 ENC_SHIFT=1
 ENC_N_SHIFTS=0  # N_SHIFT 0 means 32
