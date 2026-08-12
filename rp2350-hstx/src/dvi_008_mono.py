@@ -13,7 +13,13 @@
 #      DMA10 : notify PIO if trigger by DMA1
 #      DMA11 : get ctrl_params from PIO and set DMA2
 #   using 1 PIO for count display line and switch chain of DMA2 
-#
+#  V0.02  (2026/8/12 21:05)
+#    bug fix: Controller for TMDS with length is missing, so fix it
+#    N_OF_PIXELS = 32   # 32pixels in 1 data
+#    def setup_vga_display(buffer):
+#                     *skip*
+#             buffer[index] = 0x00_00_20_00 + N_OF_PIXELS
+
 
 
 import time
@@ -389,27 +395,8 @@ disp_frame_buffer =  make_simple_buffer(disp_data_size)
 dummy = setup_vga_display(disp_frame_buffer)  # to avoid show vars
 
 
-# >>> hex(addressof(vsync_frame_buffer))
-# '0x2000e150'
-# >>> hex(addressof(vsync_frame_buffer) + vsync_data_size * 4)
-# '0x2000e588'
-
-#  VSYNC           HSYNC         DISP
-# '0x2000e150'   '0x2000b090'   0x20022c10'
-# '0x2000e588'   '0x2000b0b0'  '0x20035810'
-
-
-#>>> hex(addressof(hsync_frame_buffer))
-#'0x2000b090'
-# >>> hex(addressof(hsync_frame_buffer) + hsync_data_size * 4)
-# '0x2000b0b0'
-
-#>>> hex(addressof(disp_frame_buffer))
-#'0x20022c10'
-
-
 #############
-#  debug
+#  for debug (monitoring by monitor pin with an Osciloscope)
 from machine import Pin
 gp0 = Pin(0, Pin.OUT)
 gp1 = Pin(1, Pin.OUT)
