@@ -19,8 +19,10 @@
 #    def setup_vga_display(buffer):
 #                     *skip*
 #             buffer[index] = 0x00_00_20_00 + N_OF_PIXELS
-
-
+#
+#  V0.03  (2026/8/13 20:20)
+#     bug fix: function make_aligned_buffer is address caclate miss, fix it 
+#
 
 import time
 import machine
@@ -256,25 +258,26 @@ def is_power_of_two(x: int) -> bool:
 #
 # create alligned buffer
 # array type is WORD(32bit) only
+# size is n of words (not bytes)
+# so in memory area, allocating address is n * 4
 #
-def make_aligned_buffer(size):
+def make_aligned_buffer(word_size):
 
-    if is_power_of_two(size):
+    if is_power_of_two(word_size):
          pass
     else:
          print('internal error! not power of 2')
          return None
 
-    buffer = array('I', [0] * size * 2)  # I means unsigned int
+    buffer = array('I', [0] * word_size * 2)  # I means unsigned int
     base_addr = addressof(buffer)
-    if base_addr == (base_addr  &  ~(size - 1)):
+    if base_addr == (base_addr  &  ~(word_size * 4 - 1)):
         target_addr = base_addr
     else:
-        target_addr = (base_addr  &  ~(size - 1)) + size
+        target_addr = (base_addr  &  ~(word_size * 4 - 1)) + word_size * 4
     offset_index = int((target_addr - base_addr) / 4)
-    print(offset_index, size)
-    return memoryview(buffer)[offset_index : offset_index + size]
-
+    print(offset_index, word_size)
+    return memoryview(buffer)[offset_index : offset_index + word_size]
 
 #
 # create simple buffer
