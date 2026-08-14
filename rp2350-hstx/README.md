@@ -107,6 +107,11 @@ sys.path.append('/path/to/rp2350-hstx/src')
 # Execute dvi_vga_mono_demo.py
 exec(open('dvi_vga_mono_demo.py').read())
 ```
+#### demo images
+- Line and Circle<br>
+  <img src="assets/line_circle.png" width=300>
+- Sin and Cos curve<br>
+  <img src="assets/sin_cos.png" width=300>
 
 ### 3. Connect Display
 
