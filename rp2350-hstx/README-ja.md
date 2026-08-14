@@ -41,13 +41,13 @@ rp2350-hstx/
 ├── README.md
 ├── README-ja.md
 ├── src/
-│   ├── dvi_010_mono.py          # メインデモプログラム
+│   ├── dvi_vga_mono_demo.py          # メインデモプログラム
 │   └── mylib.py                 # ユーティリティ関数（レジスタ操作）
 └── docs/
     └── ...
 ```
 
-### dvi_010_mono.py
+### dvi_vga_mono_demo.py
 
 メインのDVI信号生成デモプログラム。以下の機能を含みます：
 
@@ -106,7 +106,7 @@ import sys
 sys.path.append('/path/to/rp2350-hstx/src')
 
 # dvi_010_mono.py を実行
-exec(open('dvi_010_mono.py').read())
+exec(open('dvi_vga_mono_demo.py').read())
 ```
 
 ### 3. ディスプレイの接続
