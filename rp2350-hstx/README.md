@@ -40,13 +40,13 @@ rp2350-hstx/
 ├── README.md                    # This file
 ├── README-ja.md                 # Japanese version
 ├── src/
-│   ├── dvi_010_mono.py          # Main demo program
+│   ├── dvi_vga_mono_demo.py          # Main demo program
 │   └── mylib.py                 # Utility functions (register operations)
 └── docs/
     └── ...
 ```
 
-### dvi_010_mono.py
+### dvi_vga_mono_demo.py
 
 The main DVI signal generation demo program with the following features:
 
@@ -104,8 +104,8 @@ Ensure `mylib.py` is placed in the src directory. This file must contain the fol
 import sys
 sys.path.append('/path/to/rp2350-hstx/src')
 
-# Execute dvi_010_mono.py
-exec(open('dvi_010_mono.py').read())
+# Execute dvi_vga_mono_demo.py
+exec(open('dvi_vga_mono_demo.py').read())
 ```
 
 ### 3. Connect Display
