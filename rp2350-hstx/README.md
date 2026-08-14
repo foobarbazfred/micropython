@@ -52,7 +52,7 @@ The main DVI signal generation demo program with the following features:
 
 #### Clock Configuration
 - System Clock: 126MHz
-- HSTX Clock: 150MHz
+- HSTX Clock: 126MHz
 
 #### DMA Channel Configuration
 - **DMA0**: VSYNC signal transfer
