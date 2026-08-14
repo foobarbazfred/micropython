@@ -5,7 +5,7 @@ A demonstration of DVI signal generation using the RP2350's HSTX (High Speed TX)
 ## Overview
 
 ### Supported Environment
-- **MPU**: RP2350 (126MHz)
+- **MPU**: RP2350 (driving 126MHz)
 - **Board**: Raspberry Pi Pico 2
 - **Firmware**: MicroPython v1.28.0 or later
 
