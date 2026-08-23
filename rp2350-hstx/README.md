@@ -22,6 +22,7 @@ source: src/dvi_vga_mono_demo.py
 
 ### Architecture
 <img src="assets/hstx_tmds_architecture_640x480_monochrome_fix.png" width=800>
+<img width="1622" height="272" alt="image" src="https://github.com/user-attachments/assets/627cb470-78ae-40e8-9791-b7c5417032df" />
 
 ## Hardware Connection
 
