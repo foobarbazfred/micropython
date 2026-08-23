@@ -22,6 +22,7 @@ source: src/dvi_vga_mono_demo.py
 
 ### Architecture
 <img src="assets/hstx_tmds_architecture_640x480_monochrome.png" width=800>
+
 ## Hardware Connection
 
 ### GPIO Usage (GP12-GP19)
