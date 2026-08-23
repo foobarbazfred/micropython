@@ -21,7 +21,7 @@ source: src/dvi_vga_mono_demo.py
 - Line counting control via PIO
 
 ### Architecture
-<img src="assets/hstx_tmds_architecture_640x480_monochrome.png" width=800>
+<img src="assets/hstx_tmds_architecture_640x480_monochrome_fix.png" width=800>
 
 ## Hardware Connection
 
