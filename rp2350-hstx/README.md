@@ -12,6 +12,7 @@ source: src/dvi_vga_mono_demo.py
 - **Board**: Raspberry Pi Pico 2
 - **Firmware**: MicroPython v1.28.0 or later
 
+
 ### Key Features
 - 640x480 resolution DVI output (VGA standard)
 - Monochrome display (1 bit per pixel)
@@ -19,6 +20,8 @@ source: src/dvi_vga_mono_demo.py
 - Efficient data transfer using multiple DMA channels
 - Line counting control via PIO
 
+### Architecture
+<img src="assets/hstx_tmds_architecture_640x480_monochrome.png" width=800>
 ## Hardware Connection
 
 ### GPIO Usage (GP12-GP19)
