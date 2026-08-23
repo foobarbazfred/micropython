@@ -29,6 +29,8 @@ source: src/dvi_vga_mono_demo.py
 
 Connection with DVI Socket Board ([pico-dvi-sock](https://github.com/wren6991/pico-dvi-sock)):
 
+<img src="assets/RPi_Pico2_w_HDMI_connector.png" width=500>
+
 | Bit | Pin | GPIO | Signal |
 |-----|-----|------|--------|
 | 0 | D0+ | GP12 | Blue |
