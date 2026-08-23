@@ -1,6 +1,6 @@
 # RP2350 HSTX DVI Signal Generation Demo
 
-A demonstration of DVI signal generation using the RP2350's HSTX (High Speed TX) feature. This project implements monochrome display (black/white) with a frame buffer to achieve 640x480 dot resolution DVI output.
+A demonstration of DVI signal generation using the RP2350's HSTX (High Speed TX) feature. This project implements monochrome display (black/white) with a frame buffer to achieve 640x480 dot resolution DVI output. It runs on standard MicroPython without requiring custom C modules.
 
 #### Source
 source: src/dvi_vga_mono_demo.py
