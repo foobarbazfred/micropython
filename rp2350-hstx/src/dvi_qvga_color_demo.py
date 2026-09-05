@@ -8,6 +8,8 @@
 #  Sofrware:  MicroPython (v1.28.0 on 2026-04-06; Raspberry Pi Pico2 with RP2350)
 #
 #  V0.01  (2026/9/4 21:30)
+#  V0.02  (2026/9/5 11:00)
+#     create an instance of framebuf, variable fb  
 #
 
 #
@@ -808,11 +810,9 @@ import time
 import math
 import framebuf
 import random
+fb = framebuf.FrameBuffer(disp_frame_buffer, QVGA_WIDTH, QVGA_HEIGHT, framebuf.RGB565)
 
-def drawing_demo():
-
-    fb = framebuf.FrameBuffer(disp_frame_buffer, QVGA_WIDTH, QVGA_HEIGHT, framebuf.RGB565)
-    
+def drawing_demo(fb):
     
     fb.fill(0)
     fb.text('Hello, World!', 20, 100, 0xffff)
@@ -860,13 +860,9 @@ def drawing_demo():
             fb.ellipse(x, y, xr, yr, color, fill)
             time.sleep(0.1)
         
-        
-        
-        
-# drawing_demo()
+# drawing_demo(fb)
 
 
-    
 #
 #
 #    
